@@ -3,60 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Personal Homepage</title>
+    <title>Louis Cyrus Meyer</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
-            background-color: #ffffff;
-        }
-        .content {
-            display: inline-block;
-            text-align: left;
-            max-width: 800px;
-        }
-        p {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
             color: #333;
-            font-size: 13px;
+            background-color: #f8f8f8;
+            display: flex;
+            min-height: 100vh;
         }
-        .big-title {
-            color: #333;
-            font-size: 20px;
-            margin: 20px 0;
+        .sidebar {
+            width: 300px;
+            padding: 40px 20px;
+            background-color: #fff;
+            border-right: 1px solid #ddd;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
         }
-        .small-title {
-            color: #444;
-            font-size: 15px;
+        .sidebar h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #000;
             margin-bottom: 15px;
         }
-        ul {
-            list-style-type: disc;
+        .sidebar h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #000;
+            margin: 20px 0 10px;
+        }
+        .sidebar p {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .sidebar a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        .sidebar a:hover {
+            text-decoration: underline;
+        }
+        .content {
+            margin-left: 320px;
+            padding: 40px;
+            max-width: 700px;
+            flex: 1;
+        }
+        .content h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #000;
+            margin: 20px 0 10px;
+        }
+        .content p {
+            font-size: 14px;
             color: #333;
-            font-size: 13px;
-            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+        .content ul {
+            list-style-type: none;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .content li {
+            margin-bottom: 8px;
+        }
+        .content li strong {
+            font-weight: 600;
+        }
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                position: static;
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+                padding: 20px;
+            }
+            .content {
+                margin-left: 0;
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="sidebar">
+        <h1>Louis Cyrus Meyer</h1>
+        <p>Maths and Trading Enthusiast</p>
+        <p><a href="https://www.linkedin.com/in/louisc-meyer" target="_blank">LinkedIn</a></p>
+        <h2>Research Interests</h2>
+        <p>Statistical Learning (ML, DL), Quantitative Finance, Time Series Analysis</p>
+    </div>
     <div class="content">
-        
-        <h1 class="big-title">Louis Cyrus Meyer</h1>
-        
-        <p>Hey, I'm Louis. I'm into Maths and Trading.</p>
-        <p>My research interests include Statistical Learning (ML, DL) and its applications to Quantitative Finance and Time Series analysis.<p>
-        <p>Connect with me on <a href="https://www.linkedin.com/in/louisc-meyer" target="_blank">LinkedIn</a>.</p>
-        
-<!--         <h1 class="big-title">My Personal Homepage</h1> -->
-        <h2 class="small-title">Education</h2>
+        <h2>About Me</h2>
+        <p>I am Louis Cyrus Meyer, passionate about Maths and Trading. My academic and professional journey focuses on applying statistical learning to financial problems.</p>
+        <h2>Education</h2>
         <ul>
-            <li>MSc Statistics               @ <strong>Imperial College London </strong> (2020-2021)</li>
-            <li>BSc Mathematics & Statistics @ <strong>University of Warwick</strong> (2017-2020)</li>
+            <li>MSc Statistics, <strong>Imperial College London</strong> (2020-2021)</li>
+            <li>BSc Mathematics & Statistics, <strong>University of Warwick</strong> (2017-2020)</li>
         </ul>
-        <h2 class="small-title">Work Experience</h2>
+        <h2>Experience</h2>
         <ul>
-            <li>Quantitative Researcher @ <strong>Numeus Research</strong> (2023-2024)</li>
-            <li>Data Scientist          @ <strong>CausaLens</strong> (2021-2022)</li>
+            <li>Quantitative Researcher, <strong>Numeus Research</strong> (2023-2024)</li>
+            <li>Data Scientist, <strong>CausaLens</strong> (2021-2022)</li>
         </ul>
     </div>
 </body>

@@ -80,9 +80,11 @@
         .content {
             margin-left: 320px;
             padding: 40px;
-            max-width: 700px;
+            max-width: none; /* remove 700px limit */
+            width: calc(100% - 320px); /* full width minus sidebar */
             flex: 1;
         }
+
         .content h2 {
             font-size: 20px;
             font-weight: 600;
@@ -174,7 +176,8 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            height: 500px;
+            height: 50vh;  /* 50% of viewport height */
+            min-height: 400px; /* optional, keep it decent on small screens */
         }
         
         .loading {

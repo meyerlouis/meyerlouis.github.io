@@ -51,6 +51,32 @@
         .sidebar a:hover {
             text-decoration: underline;
         }
+        
+        /* Navigation */
+        .nav-menu {
+            margin-top: 30px;
+        }
+        .nav-item {
+            display: block;
+            padding: 10px 0;
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            padding-left: 15px;
+            margin-left: -15px;
+        }
+        .nav-item:hover {
+            background-color: #f0f0f0;
+            border-left-color: #0066cc;
+        }
+        .nav-item.active {
+            color: #0066cc;
+            border-left-color: #0066cc;
+            background-color: #f8f9ff;
+        }
+        
         .content {
             margin-left: 320px;
             padding: 40px;
@@ -80,6 +106,93 @@
         .content li strong {
             font-weight: 600;
         }
+        
+        /* Page sections */
+        .page-section {
+            display: none;
+        }
+        .page-section.active {
+            display: block;
+        }
+        
+        /* Chart page styles */
+        .chart-controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+        .input-field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .input-field label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+        }
+        .input-field input {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 120px;
+        }
+        .input-field input:focus {
+            outline: none;
+            border-color: #0066cc;
+        }
+        .update-btn {
+            padding: 10px 20px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .update-btn:hover {
+            background: #0052a3;
+        }
+        .update-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            height: 500px;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: #666;
+        }
+        
+        .error {
+            color: #d73502;
+            background: #ffeaea;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
@@ -95,6 +208,13 @@
                 margin-left: 0;
                 padding: 20px;
             }
+            .input-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .input-field input {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -104,27 +224,221 @@
         <p>Maths and Trading Enthusiast</p>
         <p><a href="https://www.linkedin.com/in/louisc-meyer" target="_blank">LinkedIn</a></p>
         <p><a href="https://github.com/meyerlouis" target="_blank">GitHub</a></p>
+        
+        <nav class="nav-menu">
+            <a class="nav-item active" onclick="showPage('about')">About</a>
+            <a class="nav-item" onclick="showPage('correlation')">Rolling Correlation</a>
+        </nav>
+        
         <h2>Research Interests</h2>
         <p>Statistical Learning</p>
         <p>Mathematics of Machine Learning and Deep Learning</p>
         <p>Time Series Analysis</p>
-        
         <p>Quantitative Finance</p>
         <p>Market Microstructure</p>
     </div>
+    
     <div class="content">
-        <h2>About Me</h2>
-        <p>Passionate about Statistics and Quantitative Finance. My academic and professional journey focuses on applying statistical learning to financial problems</p>
-        <h2>Education</h2>
-        <ul>
-            <li>MSc Statistics @ <strong>Imperial College London</strong> (2020-2021)</li>
-            <li>BSc Mathematics & Statistics @ <strong>University of Warwick</strong> (2017-2020)</li>
-        </ul>
-        <h2>Experience</h2>
-        <ul>
-            <li>Quantitative Researcher @ <strong>Numeus Research</strong> (2023-2024)</li>
-            <li>Data Scientist @ <strong>CausaLens</strong> (2021-2022)</li>
-        </ul>
+        <!-- About Page -->
+        <div id="about" class="page-section active">
+            <h2>About Me</h2>
+            <p>Passionate about Statistics and Quantitative Finance. My academic and professional journey focuses on applying statistical learning to financial problems</p>
+            <h2>Education</h2>
+            <ul>
+                <li>MSc Statistics @ <strong>Imperial College London</strong> (2020-2021)</li>
+                <li>BSc Mathematics & Statistics @ <strong>University of Warwick</strong> (2017-2020)</li>
+            </ul>
+            <h2>Experience</h2>
+            <ul>
+                <li>Quantitative Researcher @ <strong>Numeus Research</strong> (2023-2024)</li>
+                <li>Data Scientist @ <strong>CausaLens</strong> (2021-2022)</li>
+            </ul>
+        </div>
+        
+        <!-- Rolling Correlation Page -->
+        <div id="correlation" class="page-section">
+            <h2>Rolling Correlation Analysis</h2>
+            <p>Interactive tool for analyzing rolling correlations between two financial instruments using real-time data from Yahoo Finance.</p>
+            
+            <div class="chart-controls">
+                <div class="input-group">
+                    <div class="input-field">
+                        <label for="symbol1">Symbol 1:</label>
+                        <input type="text" id="symbol1" value="AAPL" placeholder="e.g. AAPL">
+                    </div>
+                    <div class="input-field">
+                        <label for="symbol2">Symbol 2:</label>
+                        <input type="text" id="symbol2" value="MSFT" placeholder="e.g. MSFT">
+                    </div>
+                    <div class="input-field">
+                        <label for="window">Rolling Window:</label>
+                        <input type="number" id="window" value="30" min="5" max="252">
+                    </div>
+                    <div class="input-field">
+                        <label for="period">Period:</label>
+                        <select id="period" style="padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            <option value="1y">1 Year</option>
+                            <option value="2y">2 Years</option>
+                            <option value="5y">5 Years</option>
+                            <option value="max">Max</option>
+                        </select>
+                    </div>
+                    <button class="update-btn" onclick="updateChart()">Update Chart</button>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div id="correlationChart"></div>
+            </div>
+        </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.26.0/plotly.min.js"></script>
+    <script>
+        // Page navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page-section').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                nav.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // Chart functionality
+        let chartInitialized = false;
+
+        async function updateChart() {
+            const symbol1 = document.getElementById('symbol1').value.toUpperCase();
+            const symbol2 = document.getElementById('symbol2').value.toUpperCase();
+            const window = parseInt(document.getElementById('window').value);
+            const period = document.getElementById('period').value;
+            
+            const button = document.querySelector('.update-btn');
+            const chartDiv = document.getElementById('correlationChart');
+            
+            // Validate inputs
+            if (!symbol1 || !symbol2) {
+                chartDiv.innerHTML = '<div class="error">Please enter both symbols</div>';
+                return;
+            }
+            
+            // Show loading
+            button.disabled = true;
+            button.textContent = 'Loading...';
+            chartDiv.innerHTML = '<div class="loading">Fetching data and calculating correlations...</div>';
+            
+            try {
+                // Make request to Python backend
+                const response = await fetch('http://localhost:5000/correlation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        symbol1: symbol1,
+                        symbol2: symbol2,
+                        window: window,
+                        period: period
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Create the interactive plot
+                const trace = {
+                    x: data.dates,
+                    y: data.correlation,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: `Rolling Correlation (${window}d)`,
+                    line: {
+                        color: '#0066cc',
+                        width: 2
+                    }
+                };
+                
+                const layout = {
+                    title: {
+                        text: `${symbol1} vs ${symbol2} - ${window} Day Rolling Correlation`,
+                        font: { size: 16, color: '#333' }
+                    },
+                    xaxis: {
+                        title: 'Date',
+                        type: 'date',
+                        rangeslider: { visible: true },
+                        rangeselector: {
+                            buttons: [
+                                { count: 30, label: '30d', step: 'day', stepmode: 'backward' },
+                                { count: 90, label: '3m', step: 'day', stepmode: 'backward' },
+                                { count: 6, label: '6m', step: 'month', stepmode: 'backward' },
+                                { count: 1, label: '1y', step: 'year', stepmode: 'backward' },
+                                { step: 'all' }
+                            ]
+                        }
+                    },
+                    yaxis: {
+                        title: 'Correlation',
+                        range: [-1, 1],
+                        zeroline: true,
+                        zerolinecolor: '#999',
+                        zerolinewidth: 1
+                    },
+                    margin: { t: 50, r: 50, b: 100, l: 50 },
+                    paper_bgcolor: 'white',
+                    plot_bgcolor: 'white',
+                    showlegend: false
+                };
+                
+                const config = {
+                    responsive: true,
+                    displayModeBar: true,
+                    modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d'],
+                    displaylogo: false
+                };
+                
+                Plotly.newPlot('correlationChart', [trace], layout, config);
+                chartInitialized = true;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                chartDiv.innerHTML = `<div class="error">Error: ${error.message}. Make sure the Python server is running on localhost:5000</div>`;
+            }
+            
+            // Reset button
+            button.disabled = false;
+            button.textContent = 'Update Chart';
+        }
+
+        // Initialize with default chart when correlation page is first visited
+        document.addEventListener('DOMContentLoaded', function() {
+            // You can uncomment this to load default chart on page load
+            // updateChart();
+        });
+
+        // Add enter key support for inputs
+        document.querySelectorAll('#symbol1, #symbol2, #window').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    updateChart();
+                }
+            });
+        });
+    </script>
 </body>
 </html>

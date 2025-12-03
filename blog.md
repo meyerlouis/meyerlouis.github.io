@@ -6,7 +6,9 @@ Here are some articles I wrote. I wrote them for myself, as I find these subject
 
 Feel free to send me an email if you believe I made a mistake or have omitted any important details.
 
-These notes are made to be easily readible. It assumes that the reader is familiar with the basic subjects as I rarely explain the terminology or the motivation. I try to make these posts as practical as possible and as information-dense as possible, while introducing concepts intuitively.
+These notes are made to be easily readible. It assumes that the reader is familiar with the basic subjects as I rarely explain the terminology or the motivation. I try to make these posts as practical as possible and as information-dense as possible, while introducing concepts intuitively. 
+
+Most of the content is generally coming directly from (no more than) a handful of sources, which I do not hesitate to paraphrase from if I like the wording. On that note, shoutout to Rob Tibshirani, Trevor Hastie and Andrew Ng, my spiritual Senseis.
 
 <hr class="post-divider">
 

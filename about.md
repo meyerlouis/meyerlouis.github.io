@@ -12,6 +12,9 @@ I am a recipient of the **G-Research NextGen** award, who fully sponsors my PhD.
 
 I am interested in modern Machine Learning methods and general Statistical Learning theory. I am also quite passionate about financial markets, especially from a systematic / quantitative angle. 
 
+I say the word "learning" a lot.
+
+---
 ### Education
 
 - **PhD in Statistics & Machine Learning** --  University of Warwick -- 2025-2028

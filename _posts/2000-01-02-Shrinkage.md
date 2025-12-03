@@ -145,6 +145,8 @@ $$\begin{align*}
 
 In this view, Lasso and Ridge are Bayes estimates with different priors. They are derived as posterior modes, that is, maximizers of the posterior. It is more common to use the mean of the posterior as the Bayes estimate. Ridge regression is also the posterior mean, but the Lasso is not.
 
+![Diagram](/images/Gaussian_Laplace_grey.png)
+
 ## Elastic-Net
 In Ridge, we minimize $RSS + \lambda \|\beta\|^2$, and in Lasso, $RSS + \lambda |\beta|$. Elastic-net introduces a compromise, that has both selects variables like Lasso, and shrinks together the coefficients of correlated predictors like Ridge: 
 
@@ -214,6 +216,8 @@ Only strict convexity, (which Lasso doesn't have) guaranties grouping.
 
 I should probably start by dropping this Theorem, from **Variable selection via nonconcave penalized likelihood and its oracle properties**, from Jiangqing Fan and Runze Li (2001): In the $L_q$ penalty family (for $$q\geq 1$$), only the Lasso ($q = 1$) produces sparse solutions.
 
+![Diagram](/images/lq_constraints.png)
+
 This basically means that **Bridge Regression**, which is regression with regularization $$q \in (1,2]$$, i.e. between Ridge and Lasso, does not have sharp corners. So it cannot perform Variable Selection.
 
 So what do we want really out of our linear model?
@@ -224,4 +228,29 @@ So what do we want really out of our linear model?
 
 Turns out that Elastic-Net satisfies all 3 of those criterias. It can perform Variable Selection by having those sharp corners in its constraint region. It also has the grouping effect, as the constraint is strictly convex. Finally, it is also non-rotationally invariant. So Elastic-Net FTW. 
 
+<p align="center">
+  <img src="/images/constraints_en.jpg" alt="Diagram" width="600">
+</p>
 I still use Ridge, though.
+
+---
+## References
+**The Elements ofStatistical Learning: Data Mining, Inference, and Prediction.** (2009)\
+Trevor Hastie, Robert Tibshirani, Jerome Friedman\
+[Book](https://hastie.su.domains/ElemStatLearn/)
+
+**Lecture notes on ridge regression** (2023)\
+Wessel N. van Wieringen\
+[Notes](https://arxiv.org/pdf/1509.09169)
+
+**Regularization and variable selection via the elastic net** (2005)\
+Hui Zou, Trevor Hastie\
+[Paper](https://hastie.su.domains/Papers/B67.2%20(2005)%20301-320%20Zou%20&%20Hastie.pdf)
+
+**Variable selection via nonconcave penalized likelihood and its oracle properties** (2001)\
+Jianking Fan, Runze Li\
+[Paper](https://fan.princeton.edu/sites/g/files/toruqf5476/files/documents/penlike.pdf)
+
+**Feature selection, L1 vs. L2 regularization, and rotational invariance** (2004)\
+Andrew Ng\
+[Paper](https://icml.cc/Conferences/2004/proceedings/papers/354.pdf)

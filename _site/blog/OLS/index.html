@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ordinary Least Squares | Louis Meyer</title>
+<meta name="description" content="\[\mathbf{Y = X\beta + \varepsilon}\]">
+<link rel="stylesheet" href="/assets/css/main.css">
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true
+    },
+    TeX: {
+      equationNumbers: { autoNumber: "AMS" }
+    }
+  });
+</script>
+</head>
+<body>
+  <div id="wrapper">
+    <div id="name">
+      <a href="/">Louis Meyer</a>
+    </div>
+    
+    <div id="nav">
+      <ul>
+        <li><a href="/about">About</a></li>
+        <li><a href="/blog">Blog</a></li>
+        <li><a href="/publications">Publications</a></li>
+        <li><a href="mailto:louismeyer.lcm@gmail.com">louismeyer.lcm@gmail.com</a></li>
+        <li><a href="mailto:louis.meyer@warwick.ac.uk">louis.meyer@warwick.ac.uk</a></li>
+      </ul>
+    </div>
+
+    <div id="content">
+      <div id="post">
+  <div id="post-header">
+    <h1>Ordinary Least Squares</h1>
+    <!-- <p class="post-date">January 01, 2000</p> -->
+  </div>
+
+  <div id="post-content">
+    \[\mathbf{Y = X\beta + \varepsilon}\]
+
+<h2 id="assumptions-">Assumptions :</h2>
+
+<p><strong>Linear Relationship:</strong> That goes without saying, but you implicitely assume that there is a linear relationship bewteen $\mathbf{X}$ and $\mathbf{Y}$.</p>
+
+<p><strong>Strict Exogeneity:</strong> $\mathrm{E}[\boldsymbol{\varepsilon} \mid \mathbf{X}] = 0$</p>
+<ul>
+  <li><em>Consequences:</em> $\mathrm{E}[\boldsymbol{\varepsilon}] = 0$ and $Cov(X,\varepsilon) = \mathrm{E}[\mathbf{X}^T\boldsymbol{\varepsilon}] = 0$</li>
+  <li>If it holds, regressors are exogenous. If violated, regressors are endogenous, OLS becomes biased, and instrumental variables may be needed.</li>
+</ul>
+
+<p><strong>No perfect multicollinearity</strong> $\Pr[\mathrm{rank}(\mathbf{X}) = p] = 1$</p>
+<ul>
+  <li>Regressors must be linearly independent</li>
+  <li>If violated, $\boldsymbol{\beta}$ cannot be estimated, though prediction may still be possible.</li>
+</ul>
+
+<p><strong>Spherical Errors:</strong> $\mathrm{Var}[\boldsymbol{\varepsilon} \mid \mathbf{X}] = \sigma^2 \mathbf{I}_n$</p>
+<ul>
+  <li><em>Homoscedasticity:</em> $\mathrm{E}[\varepsilon_i^2 \mid \mathbf{X}] = \sigma^2$ for all $i$</li>
+  <li><em>No Autocorrelation:</em> $\mathrm{E}[\varepsilon_i\varepsilon_j \mid \mathbf{X}] = 0$ for $i \neq j$</li>
+  <li>If violated, OLS estimates are unbiased but inefficient; use GLS or robust estimation.</li>
+</ul>
+
+<p><strong>Normality:</strong> $\boldsymbol{\varepsilon} \mid \mathbf{X} \sim \mathcal{N}(\mathbf{0}, \sigma^2\mathbf{I}_n)$</p>
+
+<h2 id="estimator-distribution-">Estimator Distribution :</h2>
+
+\[\begin{align*}
+\boldsymbol{\hat{\beta}} &amp;= (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y} \\
+&amp;= (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T(\mathbf{X}\boldsymbol{\beta} + \boldsymbol{\varepsilon}) \\
+&amp;= (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{X}\boldsymbol{\beta} + (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\boldsymbol{\varepsilon} \\
+&amp;= \boldsymbol{\beta} + (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\boldsymbol{\varepsilon}
+\end{align*}\]
+
+<p><strong>Estimator Mean:</strong></p>
+
+\[\begin{align*}
+E[\boldsymbol{\hat{\beta}}] &amp;= E[\boldsymbol{\beta} + (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\boldsymbol{\varepsilon} | \mathbf{X}] \\
+&amp;= \boldsymbol{\beta} + (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T E[\boldsymbol{\varepsilon} | \mathbf{X}] \\
+&amp;= \boldsymbol{\beta}
+\end{align*}\]
+
+<p><strong>Estimator Variance:</strong></p>
+
+\[\begin{align*}
+Var(\boldsymbol{\hat{\beta}}) &amp;= Var(\boldsymbol{\beta} + (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\boldsymbol{\varepsilon}) \\
+&amp;= \boldsymbol{\beta} +Var((\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\boldsymbol{\varepsilon})\\
+&amp;= (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T Var(\varepsilon) \mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1} \\
+&amp;= \sigma^2 (\mathbf{X}^T\mathbf{X})^{-1}
+\end{align*}\]
+
+<p>Under normality assumption $\boldsymbol{\varepsilon} \sim \mathcal{N}(\mathbf{0}, \sigma^2)$, $\qquad \qquad\boldsymbol{\hat{\beta}} \sim \mathcal{N}(\beta, \sigma^2 (\mathbf{X}^T\mathbf{X})^{-1})$.</p>
+
+<h3 id="hypothesis-testing-">Hypothesis Testing :</h3>
+<p>\(\text{RSS} = \varepsilon^\top \varepsilon = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2\)</p>
+
+\[\qquad \qquad \text{estimate variance } \sigma^2 \text{ by } \qquad \qquad 
+\hat{\sigma}^2 = \frac{\text{RSS}}{n - p}
+\quad \qquad \text{($n - p$ makes it unbiased } \mathbb{E}[\hat{\sigma}^2] = \sigma^2\text{)}\]
+
+\[\text{RSE} = \sqrt{\sigma} = \sqrt{\frac{\varepsilon^\top \varepsilon}{n - p}}\]
+
+<p><strong>Testing $\beta_j = 0$ :</strong>
+Define the z-score \(z = \frac{\hat{\beta}}{SE(\hat{\beta})} = \frac{\hat{\beta}}{\hat{\sigma}\sqrt{(X^TX)}} \sim t_{n-p}\)</p>
+
+<p>One can construct a confidence interval:</p>
+
+\[\hat{\beta}_j \pm t_{n - p,\, 1 - \alpha/2} \; \text{SE}(\hat{\beta}_j)\]
+
+\[\hat{\beta}_j \pm z_{1 - \alpha/2} \; \text{SE}(\hat{\beta}_j) \qquad \text{as $t_{n - p} \to \mathcal{N}(0,1)$ when $n \to \infty$}\]
+
+<p><strong>Testing Model 1</strong> with $p_1$ parameters vs. <strong>Model 2</strong> with $p_2$ parameters, $p_1 &gt; p_2$:</p>
+
+\[F = \frac{(RSS_0 - RSS_1) / (p_1-p_0)}{RSS_1/(n-p1)} \sim F_{p_1-p_0, n-p_1}\]
+
+<h3 id="metrics">Metrics</h3>
+<ul>
+  <li>$\mathbf{R^2} = 1 - \frac{\text{RSS}}{\text{TSS}} \quad (= \rho_{xy}^2)$</li>
+  <li><strong>Adjusted</strong> $\mathbf{R^2} = 1 - \left(\frac{1 - R^2}{n - p - 1}\right) \cdot (n - 1)$</li>
+  <li><strong>AIC</strong> $= 2k - 2 \ln(L)$</li>
+  <li><strong>BIC</strong> $= \ln(n)k - 2 \ln(L)$</li>
+</ul>
+
+<h3 id="gaussmarkov-theorem">Gauss–Markov Theorem</h3>
+
+<p><strong>Theorem (Gauss–Markov):</strong>
+If the following assumptions hold:</p>
+<ul>
+  <li>Linearity: $y = X\beta + \varepsilon$</li>
+  <li>$\mathbb{E}[\varepsilon] = 0$</li>
+  <li>$\operatorname{Var}(\varepsilon) = \sigma^2 I$</li>
+  <li>$X$ has full column rank</li>
+</ul>
+
+<p>then the OLS estimator is <strong>Best Linear Unbiased Estimator (BLUE)</strong>.</p>
+
+<p><strong>Proof:</strong></p>
+
+<p>Let $\tilde{\beta} = C y$ be another linear estimator of $\beta$, with
+$C = (X^\top X)^{-1} X^\top + D$</p>
+
+\[\begin{aligned}
+\mathbb{E}[\tilde{\beta}]
+&amp;= \mathbb{E}[C y] \\
+&amp;= \mathbb{E}\!\left[\big((X^\top X)^{-1} X^\top + D\big)(X\beta + \varepsilon)\right] \\
+&amp;= \big((X^\top X)^{-1} X^\top + D\big) X \beta + \big((X^\top X)^{-1} X^\top + D\big)\mathbb{E}\! \left[\varepsilon\right] \\
+&amp;= (X^\top X)^{-1} X^\top X \beta + D X \beta \\
+&amp;= (I + D X)\beta.
+\end{aligned}\]
+
+<p>So $\tilde{\beta}$ is unbiased if and only if $D X = 0$.</p>
+
+\[\begin{aligned}
+\operatorname{Var}(\tilde{\beta})
+&amp;= \operatorname{Var}(C y) \\
+&amp;= C \operatorname{Var}(y) C^\top \\
+&amp;= \sigma^2 C C^\top \\
+&amp;= \sigma^2 \big( (X^\top X)^{-1} X^\top + D \big) \big( X (X^\top X)^{-1} + D^\top \big) \\
+&amp;= \sigma^2 \left( (X^\top X)^{-1} + (X^\top X)^{-1} X^\top D^\top + D X (X^\top X)^{-1} + D D^\top \right).
+\end{aligned}\]
+
+<p>% Using the unbiasedness condition $D X = 0$:</p>
+
+<p>\(\operatorname{Var}(\tilde{\beta}) = \sigma^2 (X^\top X)^{-1} + \sigma^2 D D^\top.\)
+as unbiasedness condition $D X = 0$</p>
+
+\[\operatorname{Var}(\tilde{\beta}) \succeq \operatorname{Var}(\hat{\beta}) = \sigma^2 (X^\top X)^{-1}.\]
+
+<p>Since $D D^\top$ is PSD, so  $\hat{\beta}$ has the smallest variance among all linear unbiased estimators and is therefore <strong>BLUE</strong>.</p>
+
+<h3 id="frischwaughlovell-theorem">Frisch–Waugh–Lovell Theorem</h3>
+
+<p>If you have an OLS:
+\(Y = \beta_1X_1 + \beta_2X_2 + \varepsilon\)
+Then $\beta_2$ will be the same as:
+\(M_1Y = \beta_2M_1X_2 + M_1\varepsilon\)
+where $M1 $be the <em>residual-maker</em> (or <em>annihilator</em>) matrix
+which projects any vector onto the space orthogonal to the column space of $X_1$:
+\(M_1 = I - X_1 (X_1^\top X_1)^{-1} X_1^\top\)</p>
+
+<p><strong>Procedure:</strong></p>
+<ul>
+  <li><em>Residuals of $y$ on $X_1$:</em>
+  $
+  \tilde{y} = M_1 y = y - X_1 (X_1^\top X_1)^{-1} X_1^\top y.
+  $</li>
+  <li><em>Orthogonal component of $X_2$ wrt $X_1$:</em>
+  $
+  \tilde{X}_2 = M_1 X_2 = X_2 - X_1 (X_1^\top X_1)^{-1} X_1^\top X_2.
+  $</li>
+  <li><em>Regress $\tilde{y}$ on $\tilde{X}_2$:</em>
+  $
+  \tilde{\beta}_2 = (\tilde{X}_2^\top \tilde{X}_2)^{-1} \tilde{X}_2^\top \tilde{y}.
+  $</li>
+  <li>Then $\tilde{\beta}_2= \hat{\beta}_2$</li>
+</ul>
+
+<hr />
+<h2 id="violated-assumptions-in-ols">Violated Assumptions in OLS</h2>
+
+<h3 id="model-misspecification--functional-form">Model Misspecification / Functional Form</h3>
+<p><strong>Issue:</strong> Wrong functional form, omitted variables, or nonlinearity. Violates $\mathbb{E}[\varepsilon|X] = 0$ if true relationship is nonlinear but model is linear.</p>
+
+<p><strong>Consequences:</strong></p>
+<ul>
+  <li><strong>Biased Estimates:</strong> $\hat{\beta}$ biased and inconsistent when functional form is misspecified. Bias magnitude depends on degree of misspecification.</li>
+  <li><strong>Omitted Variable Bias:</strong> If $y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \varepsilon$ but only regress on $x_1$, then $\mathbb{E}[\hat{\beta}_1] = \beta_1 + \beta_2 \frac{\text{Cov}(x_1, x_2)}{\text{Var}(x_1)}$ (biased unless $x_1 \perp x_2$ or $\beta_2 = 0$).</li>
+</ul>
+
+<p><strong>Diagnostics:</strong></p>
+<ul>
+  <li><strong>Residual Plots:</strong> Plot residuals $\varepsilon$ vs. fitted values $\hat{y}$ or vs. individual predictors $x_j$. Should see no pattern (random scatter around zero). Systematic patterns (U-shape, curves, trends) indicate misspecification.</li>
+  <li><strong>Partial Residual Plots:</strong> Plot $e + \hat{\beta}_j x_j$ vs. $x_j$ to detect nonlinearity in variable $x_j$ while controlling for others.</li>
+</ul>
+
+<p><strong>Remedies:</strong></p>
+<ul>
+  <li><strong>Nonlinear Transformations of Predictors:</strong> Use $\log(x)$, $\sqrt{x}$, $x^2$, $1/x$</li>
+  <li><strong>Interaction Terms:</strong> Include $x_1 \cdot x_2$ if effect of $x_1$ depends on level of $x_2$.</li>
+  <li><strong>Box-Cox Transformation:</strong> Transform dependent variable: $y^{(\lambda)} = \frac{y^\lambda - 1}{\lambda}$ (or $\log(y)$ if $\lambda = 0$). Choose $\lambda$ via MLE to improve model fit.</li>
+</ul>
+
+<h3 id="multicollinearity">Multicollinearity</h3>
+<p><strong>Issue:</strong> High correlation among regressors causes an ill-conditioned $X^\top X$ matrix, leading to:</p>
+<ul>
+  <li><strong>Inflated Variance \&amp; Unstable Estimates:</strong> The sampling variance, $\text{Var}(\hat{\beta}) = \sigma^2 (X^\top X)^{-1}$, becomes inflated. This instability in $\hat{\beta}$ leads to deflated t-statistics, increasing the risk of Type II error (failing to identify a significant effect).</li>
+  <li><strong>Unreliable Interpretation:</strong> It becomes difficult to disentangle the individual effect of each predictor, making coefficient interpretation unreliable.</li>
+</ul>
+
+<p><strong>Diagnostics:</strong></p>
+<ul>
+  <li><strong>Variance Inflation Factor (VIF):</strong> $\text{VIF}_j = \frac{1}{1-R_j^2}$ for regressor $j$. A high VIF indicates multicollinearity, as $\text{Var}(\hat{\beta}_j) = \text{Var}(\hat{\beta}_j)^{\text{orth}} \times \text{VIF}_j$, where the variance is multiplied relative to the orthogonal case.</li>
+  <li><strong>Condition Number:</strong> $\kappa = \sqrt{\lambda_\text{max} / \lambda_\text{min}}$ of $X$ or $X^\top X$. Values &gt; 30 suggest significant multicollinearity.</li>
+</ul>
+
+<p><strong>Remedies:</strong> Shrinkage (Ridge, Lasso), Dimensionality Reduction (Principal Component Regression), FWL Theorem.</p>
+
+<h3 id="heteroskedasticity">Heteroskedasticity</h3>
+<p><strong>Issue:</strong> Non-constant error variance, $\mathrm{Var}(\varepsilon_i) = \sigma_i^2$. OLS remains unbiased but is inefficient (no longer BLUE). The standard covariance matrix $\sigma^2(X^\top X)^{-1}$ is incorrect, leading to biased standard errors and invalid inference (t-statistics, confidence intervals).</p>
+
+<p><strong>Diagnostics:</strong></p>
+<ul>
+  <li><strong>Graphics:</strong> Plot residuals ($e_i$) vs. predictors ($X_i$) or fitted values ($\hat{y}_i$) (should be around 0 with constant variance). Also plot squared residuals vs. predictors (need a flat line around $\sigma^2$).</li>
+  <li><strong>tests :</strong> Breusch-Pagan (tests if variance depends on predictors), White (general test for heteroskedasticity), Goldfeld-Quandt tests for differing variance between two data subsets)</li>
+</ul>
+
+<p><strong>Remedies:</strong></p>
+<ul>
+  <li><strong>Robust Standard Errors (Eicker–Huber–White):</strong> The preferred solution for inference. Instead of the standard covariance matrix $\sigma^2(X^\top X)^{-1}$, it uses a consistent estimator:
+      \(\widehat{V}_{ehw} = (X^\top X)^{-1} (X^\top \hat{\Omega} X) (X^\top X)^{-1}, \quad \hat{\Omega} = \text{diag}(\hat{\varepsilon}_1^2, \ldots, \hat{\varepsilon}_n^2)\)
+      where \(\widehat{V}_{ehw}\) is the Eicker–Huber–White (EHW) robust covariance matrix. We can now do test using \(\hat{\beta} \overset{a}{\sim} \mathcal{N}(\beta, \widehat{V}_{ehw})\)</li>
+  <li><strong>Weighted Least Squares (WLS):</strong> If $\sigma_i^2$ is known for each measurement, we can set $w_i = 1 / \sigma_i^2$</li>
+  <li><strong>Transformations:</strong> Log, Box-Cox, etc., to stabilize variance (may also affect functional form).</li>
+</ul>
+
+<h3 id="autocorrelated-errors">Autocorrelated Errors</h3>
+<p><strong>Issue:</strong> Non-zero covariance between errors, $\mathrm{Cov}(\varepsilon_i, \varepsilon_j) \neq 0$ for $i \neq j$. This violates the Gauss-Markov assumption that errors are independent. In time series data, this commonly follows an AR(1) process: $\varepsilon_t = \rho \varepsilon_{t-1} + u_t$ where $u_t \sim \text{IID}(0, \sigma_u^2)$.</p>
+
+<p><strong>Consequences:</strong></p>
+<ul>
+  <li><strong>Reduced Effective Sample Size:</strong> With positive autocorrelation ($\rho &gt; 0$), consecutive observations are not fully independent. For AR(1) errors, the variance inflation factor is approximately $\frac{1+\rho}{1-\rho}$, so \(\text{Var}(\hat{\beta})_{AR(1)} \approx \frac{1+\rho}{1-\rho} \cdot \text{Var}(\hat{\beta})_{IID}\).</li>
+  <li><strong>Biased Inference:</strong> OLS estimators remain unbiased and consistent, but are inefficient. The conventional OLS standard errors are inconsistent:</li>
+  <li>For $\rho &gt; 0$: Standard errors are typically <em>underestimated</em>, making confidence intervals artificially narrow and inflating t-statistics (increased Type I error rates).</li>
+  <li>For $\rho &lt; 0$: Standard errors are typically <em>overestimated</em>, leading to conservative inference (increased Type II error rates).</li>
+</ul>
+
+<p><strong>Diagnostics:</strong></p>
+<ul>
+  <li><strong>Residual Plots:</strong> Plot residuals against time; look for tracking patterns where adjacent residuals tend to have similar signs and magnitudes. ACF / PACF plots also.</li>
+  <li><strong>Durbin-Watson Test:</strong> 
+      \(d = \frac{\sum_{t=2}^T (e_t - e_{t-1})^2}{\sum_{t=1}^T e_t^2} \approx 2(1-\hat{\rho})\)
+      Tests $H_0: \rho = 0$ vs $H_1: \rho \neq 0$ (or one-sided alternatives). Values significantly below 2 suggest positive autocorrelation; values significantly above 2 suggest negative autocorrelation. Limitation: Only tests for AR(1) autocorrelation and is inconclusive near 2.</li>
+  <li><strong>Box-Pierce Test:</strong> General test for autocorrelation up to lag $h$:
+      \(Q_{BP} = n\sum_{k=1}^h \hat{\rho}_k^2 \sim \chi^2_h\)
+      where $\hat{\rho}_k$ is the sample autocorrelation at lag $k$.</li>
+  <li><strong>Ljung-Box Test:</strong> Modified version with better small-sample properties:
+      \(Q_{LB} = n(n+2)\sum_{k=1}^h \frac{\hat{\rho}_k^2}{n-k} \sim \chi^2_h\)
+      Generally preferred over Box-Pierce in practice.</li>
+</ul>
+
+<p><strong>Remedies:</strong></p>
+<ul>
+  <li><strong>Generalized Least Squares (GLS):</strong> For AR(1) errors, transform data via $y_t^* = y_t - \rho y_{t-1}$ and $X_t^* = X_t - \rho X_{t-1}$. The <strong>Cochrane-Orcutt</strong> procedure iteratively estimates $\rho$ from OLS residuals and applies the transformation until convergence.</li>
+  <li><strong>Newey-West HAC Standard Errors:</strong> Heteroskedasticity and Autocorrelation Consistent (HAC) robust covariance estimator: 
+      \(\widehat{V}_{NW} = (X^\top X)^{-1} \hat{\Omega} (X^\top X)^{-1}\)
+      where $\hat{\Omega}$ accounts for autocorrelation up to lag $L$ using a kernel weighting scheme.</li>
+  <li><strong>Include Lagged Dependent Variable:</strong> For time series models, adding $y_{t-1}$ as a regressor may capture autocorrelation in the original error term, transforming it into proper model dynamics. Note: This creates a dynamic panel model with different asymptotic properties.</li>
+</ul>
+
+<h3 id="heavy-tailed--non-normal-errors">Heavy-tailed / Non-normal Errors</h3>
+<p><strong>Issue:</strong> Errors $\varepsilon_i$ deviate from normality, particularly with heavy tails (high kurtosis). Normality not required for OLS unbiasedness, but departures affect inference and efficiency.<br />
+<strong>Consequences:</strong></p>
+<ul>
+  <li><strong>Variance Overestimation:</strong> $\hat{\sigma}^2$ highly sensitive to extreme values, typically <em>overestimated</em> with heavy-tailed outliers. This inflates standard errors, making CIs artificially wide and $\hat{\beta}$ appear less significant (reduces power, increases Type II error).</li>
+  <li><strong>Inference Validity:</strong> t-tests and F-tests assume normality for exact finite-sample validity. Under non-normality, these rely on CLT for asymptotic approximations. With heavy tails (Cauchy, Pareto with $\alpha &lt; 2$), CLT fails and inference is invalid even asymptotically.</li>
+</ul>
+
+<p><strong>Diagnostics:</strong></p>
+<ul>
+  <li><strong>Q-Q Plot:</strong> Sample quantiles vs. theoretical normal quantiles. Heavy tails appear as deviations at extremes (both ends curving away).</li>
+  <li><strong>Sample Kurtosis:</strong> Excess kurtosis $&gt; 0$ indicates heavier tails. Kurtosis $&gt; 10$ suggests severe heavy-tailedness.</li>
+  <li><strong>Shapiro-Wilk:</strong> Most powerful normality test for $n &lt; 2000$. $W = \frac{(\sum_{i=1}^n a_i x_{(i)})^2}{\sum_{i=1}^n (x_i - \bar{x})^2}$. P-value $&lt; \alpha$ rejects normality.</li>
+  <li><strong>Goodness of fit tests:</strong> Kolmogorov-Smirnov (compares empirical CDF to theoretical normal CDF), Anderson-Darling (similar to KS but more weight on the tails)</li>
+</ul>
+
+<p><strong>Remedies:</strong></p>
+<ul>
+  <li><strong>Robust SEs:</strong> HC or HAC standard errors remain valid under non-normality (rely on asymptotic approximations).</li>
+  <li><strong>Bootstrap SEs:</strong> Non-parametric bootstrap provides valid inference without distributional assumptions. Use residual bootstrap or pairs bootstrap.</li>
+  <li><strong>Studentized Residuals:</strong> $r_i = \frac{\varepsilon_i}{\hat{\sigma}\sqrt{1-H_{ii}}}$ with $H = X(X^TX)^{-1}X^T$.</li>
+</ul>
+
+
+  </div>
+</div>
+
+
+    </div>
+  </div>
+</body>
+</html>

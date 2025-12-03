@@ -1,0 +1,28 @@
+title: Louis Meyer
+email: louismeyer.lcm@gmail.com
+email2: louis.meyer@warwick.ac.uk
+description: >-
+  Brief description of your work and interests.
+baseurl: ""
+url: "http://localhost:4000"
+
+# Build settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  math_engine: mathjax
+
+permalink: /blog/:title/
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+
+# Exclude from build
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - vendor/

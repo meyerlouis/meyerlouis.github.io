@@ -5,7 +5,7 @@ title: About
 
 I'm a PhD Student at the University of Warwick, supervised by Dr. Wenkai Xu.
 
-My research focus on Statistical Learning, with special interests for Machine Learning and Deep Learning. I'm currently working on Kernel methods to model dependencies between non-stationary time-series.
+My research focuses on Statistical Learning, with special interests for Machine Learning and Deep Learning. I'm currently working on Kernel methods to model dependencies between non-stationary time-series.
 
 I am a recipient of the **G-Research NextGen** award, who fully sponsors my PhD. Thanks GR.
 
@@ -14,7 +14,7 @@ I am interested in modern Machine Learning methods and general Statistical Learn
 
 ### Education
 
-- **PhD in Statistics & Machine Learing** --  University of Warwick -- 2025-2028
+- **PhD in Statistics & Machine Learning** --  University of Warwick -- 2025-2028
 - **MSc Statistics** -- Imperial College London -- 2020-2021
 - **BSc Mathematics & Statistics** -- University of Warwick -- 2017-2020
 

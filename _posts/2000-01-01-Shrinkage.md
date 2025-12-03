@@ -152,6 +152,8 @@ $$\textit{minimize} \qquad RSS + \lambda \Sigma (\alpha \beta_j^2 + (1-\alpha)|\
 
 This introduces an extra parameter $\alpha$ that defines the strength of the L2-Norm relative to the L1-Norm.
 
+You can compute the solution using the LARS-EN algorithm for the same computational cost as Lasso.
+
 
 ---
 ## Lasso vs Ridge
@@ -220,6 +222,6 @@ So what do we want really out of our linear model?
 - Grouping Effect
 - Non - Rotational Invariance
 
-Turns out that Elastic-Net satisfies all 3 of those criterias. It can perform Variable Selection by having those sharp corners in its constraint region. It also has the grouping effect, as the constraint is strictly convex. Finally, it is also non-rotationally invariant. So Elastic-Net FTW.
+Turns out that Elastic-Net satisfies all 3 of those criterias. It can perform Variable Selection by having those sharp corners in its constraint region. It also has the grouping effect, as the constraint is strictly convex. Finally, it is also non-rotationally invariant. So Elastic-Net FTW. 
 
 I still use Ridge, though.

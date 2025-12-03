@@ -277,7 +277,7 @@ This is all for today. Actually, this is way too much for any day.
 Trevor Hastie, Robert Tibshirani, Jerome Friedman\
 [Book](https://hastie.su.domains/ElemStatLearn/){:target="_blank"}
 
-**k-means++: The Advantages of Careful Seeding**\
+**k-means++: The Advantages of Careful Seeding** (2006)\
 David Arthur, Sergei Vassilvitskii\
 [Paper](http://ilpubs.stanford.edu:8090/778/1/2006-13.pdf){:target="_blank"}
 

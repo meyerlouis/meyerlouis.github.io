@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Clustering"
-subtitle: "K-means and Hierarchical Clustering. Distance functions, linkage criterias and model assessment. Also  Mixture Models and the EM Algorithm — sorry. Even I don't care about that."
+subtitle: "K-means and Hierarchical Clustering. Distance functions, linkage criterias and model assessment. Also  Mixture Models and the EM Algorithm — sorry. Even I don't like it."
 ---
 
 ## K-means

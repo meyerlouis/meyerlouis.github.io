@@ -46,9 +46,9 @@ $$\sum_{x\in S_i} (x_i - \mu_i)
 
 **Initialization methods**
 - Random Partition: assign each point randomly to a cluster, compute means
-- Forgy Method: Pick K random points as initial centroids
+- Forgy Method: pick K random points as initial centroids
 
-- ***K-means++***:
+- ***K-means++***: spreads out the initial cluster centers. Cluster centers are sampled sequentially and each new cluster is chosen from the remaining data points with probability proportional to its square distance from the closest existing cluster center.
 > - $m_1 \sim \mathrm{Uniform}(\{x_1, x_2, \dots, x_n\})$
 > - for $t = 2, \dots, k$:
 >     - for each point $x_i$:
@@ -276,6 +276,10 @@ This is all for today. Actually, this is way too much for any day.
 **The Elements ofStatistical Learning: Data Mining, Inference, and Prediction.** (2009)\
 Trevor Hastie, Robert Tibshirani, Jerome Friedman\
 [Book](https://hastie.su.domains/ElemStatLearn/){:target="_blank"}
+
+**k-means++: The Advantages of Careful Seeding**\
+David Arthur, Sergei Vassilvitskii\
+[Paper](http://ilpubs.stanford.edu:8090/778/1/2006-13.pdf){:target="_blank"}
 
 **Maximum Likelihood from Incomplete Data via the EM Algorithm** (1977)\
 A. P. Dempster, N. M. Laird, D. B. Rubin\

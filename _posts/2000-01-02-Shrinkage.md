@@ -5,7 +5,7 @@ subtitle: "Ridge, Lasso and Elastic-Net: the 3 musketeers. (I actually only use 
 ---
 
 ## The Problem
-Shrinkage methods are used for two reasons: to deal with *multicollinearity* and do *variable selection*. When high multicollinearity is present, the design matrix $X^TX$ becomes degenerate. When perfect multicollinearity is present, $rank(X^TX) < n$ and the matrix is invertible, so it is impossible to solve OLS. As a motivating example, perform the eigendecomposition of the design matrix:
+Shrinkage methods are used for two reasons: to deal with *multicollinearity* and do *variable selection*. When high multicollinearity is present, the design matrix $X^TX$ becomes degenerate. When perfect multicollinearity is present, $rank(X^TX) < n$ and the matrix is singular and thus non-invertible, so it is impossible to solve OLS. As a motivating example, perform the eigendecomposition of the design matrix:
 
 $$X^TX = Q\Lambda Q^{-1}$$
 
@@ -17,7 +17,7 @@ where $\Lambda^{-1}$ is the diagonal matrix with inverse eigenvalues, e.g. $1/\l
 
 ## Ridge
 ### General Form
-Instead of minimizing $\|y-X\beta\|^2$ (MSE) we know minimize $\|y-X\beta\|^2 + \lambda \|\beta\|^2$. This can also be formulated as
+Instead of minimizing $\|y-X\beta\|^2$ (MSE) we now minimize $\|y-X\beta\|^2 + \lambda \|\beta\|^2$. This can also be formulated as
 
 $$\textit{minimize} \quad RSS \quad \text{subject to} \quad \Sigma\beta^2<t$$
 
@@ -50,7 +50,7 @@ $$
 $$
 
 
-The ridge estimates are essentially the OLS estimates $\hat{\beta}=V D^{-1} U^T Y=V (D^2)^{-1}D U^T Y$ multiplied by the term $\frac{D^2}{D^2 + \lambda I_n}$, which is always between 0 and 1. This has the effect of shifting the coefficient estimates downward. The coefficients with a smaller corresponding value $d_i$ (the $i$th diagonal of $D$) will be whrunk more than coefficients with a large $d_i$. So covariates that account for very littel of the variance in the data will be shifted to zero more quickly.
+The ridge estimates are essentially the OLS estimates $\hat{\beta}=V D^{-1} U^T Y=V (D^2)^{-1}D U^T Y$ multiplied by the term $\frac{D^2}{D^2 + \lambda I_n}$, which is always between 0 and 1. This has the effect of shifting the coefficient estimates downward. The coefficients with a smaller corresponding value $d_i$ (the $i$th diagonal of $D$) will be whrunk more than coefficients with a large $d_i$. So covariates that account for very little of the variance in the data will be shifted to zero more quickly.
 
 
 ---
@@ -147,6 +147,8 @@ In this view, Lasso and Ridge are Bayes estimates with different priors. They ar
 
 ![Diagram](/images/Gaussian_Laplace_grey.png)
 
+One can easily see how the definitions of regularization as priors on the distribution of the coefficients relate to their shrinking behavior. Imagine your OLS solution $\hat{\beta}$ as a point on one of the two prior curves (Gaussian for Ridge, Laplace for Lasso), and the shrinking process as the effect of these priors “pulling" the estimate toward 0. Because the Laplace prior has a sharp peak at $0$, increasing the regularization coefficient $\lambda$ can pull a coefficient exactly to $0$. In contrast, the Gaussian prior is smooth at $0$, so the corresponding Ridge penalty only shrinks coefficients continuously toward $0$ and never forces them to be exactly zero.
+
 ## Elastic-Net
 In Ridge, we minimize $RSS + \lambda \|\beta\|^2$, and in Lasso, $RSS + \lambda |\beta|$. Elastic-net introduces a compromise, that has both selects variables like Lasso, and shrinks together the coefficients of correlated predictors like Ridge: 
 
@@ -237,20 +239,20 @@ I still use Ridge, though.
 ## References
 **The Elements ofStatistical Learning: Data Mining, Inference, and Prediction.** (2009)\
 Trevor Hastie, Robert Tibshirani, Jerome Friedman\
-[Book](https://hastie.su.domains/ElemStatLearn/)
+[Book](https://hastie.su.domains/ElemStatLearn/){:target="_blank"}
 
 **Lecture notes on ridge regression** (2023)\
 Wessel N. van Wieringen\
-[Notes](https://arxiv.org/pdf/1509.09169)
+[Notes](https://arxiv.org/pdf/1509.09169){:target="_blank"}
 
 **Regularization and variable selection via the elastic net** (2005)\
 Hui Zou, Trevor Hastie\
-[Paper](https://hastie.su.domains/Papers/B67.2%20(2005)%20301-320%20Zou%20&%20Hastie.pdf)
+[Paper](https://hastie.su.domains/Papers/B67.2%20(2005)%20301-320%20Zou%20&%20Hastie.pdf){:target="_blank"}
 
 **Variable selection via nonconcave penalized likelihood and its oracle properties** (2001)\
 Jianking Fan, Runze Li\
-[Paper](https://fan.princeton.edu/sites/g/files/toruqf5476/files/documents/penlike.pdf)
+[Paper](https://fan.princeton.edu/sites/g/files/toruqf5476/files/documents/penlike.pdf){:target="_blank"}
 
 **Feature selection, L1 vs. L2 regularization, and rotational invariance** (2004)\
 Andrew Ng\
-[Paper](https://icml.cc/Conferences/2004/proceedings/papers/354.pdf)
+[Paper](https://icml.cc/Conferences/2004/proceedings/papers/354.pdf){:target="_blank"}

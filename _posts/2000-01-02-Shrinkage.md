@@ -255,4 +255,4 @@ Jianking Fan, Runze Li\
 
 **Feature selection, L1 vs. L2 regularization, and rotational invariance** (2004)\
 Andrew Ng\
-[Paper](https://icml.cc/Conferences/2004/proceedings/papers/354.pdf){:target="_blank"}
+[Paper](https://ai.stanford.edu/~ang/papers/icml04-l1l2.pdf){:target="_blank"}

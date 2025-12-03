@@ -7,7 +7,7 @@ title: Publications
 
 ### :(
 
-Will have some soon, I promise
+Will have some soon, I promise. Trust.
 
 
 <!-- <div class="pub-item">

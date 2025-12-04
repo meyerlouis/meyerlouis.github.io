@@ -137,7 +137,8 @@ The extent to which the hierarchical structure produced by a dendogram actually 
     - $a(i) = $ average distance from i to all other points in the same cluster 
     - $b(i) = $ *minimum* average distance from i to points in any other cluster
 
-     $$Silhouette \hspace{0.5em} s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))}$$
+    $$Silhouette \hspace{0.5em} s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))}$$
+    
     - $s(i) \approx 1$ tells that the point is well clustered (far from other points), $s(i) \approx 0$ that the point is on the boundary between clusters, and $s(i) \approx -1$ that the point is probably in the wrong cluster
     - $Overall \hspace{0.5em} Silhouette \hspace{0.5em} Score = \frac{1}{n} \sum s(i)$
     - Works with any distance metrics. However it has $O(n^2)$ computation, is biased towards complex clusters and can be sensitive to noise and outliers.
@@ -168,7 +169,7 @@ The extent to which the hierarchical structure produced by a dendogram actually 
 - ***Dendogram***: Usually done for Hierarchical Clustering
 
 ![Diagram](/images/elbow_silhouette.jpg)
-*Note: This is not supposed to represent plots for the same dataset / clustering method. Those are just illustrative. And yes, the right choice looks like $k=4$ for the Elbow plot, and $K=5$ for the Silhouette*
+*Note: This is not supposed to represent plots for the same dataset / clustering method. Those are just illustrative. And yes, the right choice looks like $K=4$ for the Elbow plot, and $K=5$ for the Silhouette*
 
 
 

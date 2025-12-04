@@ -145,7 +145,17 @@ $$\begin{align*}
 
 In this view, Lasso and Ridge are Bayes estimates with different priors. They are derived as posterior modes, that is, maximizers of the posterior. It is more common to use the mean of the posterior as the Bayes estimate. Ridge regression is also the posterior mean, but the Lasso is not.
 
-![Diagram](/images/Gaussian_Laplace_grey.png)
+<!-- ![Diagram](/images/Gaussian_Laplace_grey.png) -->
+
+<p align="center">
+<img 
+  src="{{ '/images/Gaussian_Laplace_grey.png' | relative_url }}"
+  data-light-src="{{ '/images/Gaussian_Laplace_grey.png' | relative_url }}"
+  data-dark-src="{{ '/images/Gaussian_Laplace_dark.png' | relative_url }}"
+  alt="Diagram"
+/>
+</p>
+
 
 One can easily see how the definitions of regularization as priors on the distribution of the coefficients relate to their shrinking behavior. Imagine your OLS solution $\hat{\beta}$ as a point on one of the two prior curves (Gaussian for Ridge, Laplace for Lasso), and the shrinking process as the effect of these priors “pulling" the estimate toward 0. Because the Laplace prior has a sharp peak at $0$, increasing the regularization coefficient $\lambda$ can pull a coefficient exactly to $0$. In contrast, the Gaussian prior is smooth at $0$, so the corresponding Ridge penalty only shrinks coefficients continuously toward $0$ and never forces them to be exactly zero.
 
@@ -218,7 +228,17 @@ Only strict convexity, (which Lasso doesn't have) guaranties grouping.
 
 I should probably start by dropping this Theorem, from **Variable selection via nonconcave penalized likelihood and its oracle properties**, from Jiangqing Fan and Runze Li (2001): In the $L_q$ penalty family (for $$q\geq 1$$), only the Lasso ($q = 1$) produces sparse solutions.
 
-![Diagram](/images/lq_constraints.png)
+<!-- ![Diagram](/images/lq_constraints.png) -->
+
+<p align="center">
+<img 
+  src="{{ '/images/lq_constraints.png' | relative_url }}"
+  data-light-src="{{ '/images/lq_constraints.png' | relative_url }}"
+  data-dark-src="{{ '/images/lq_constraints_dark.png' | relative_url }}"
+  alt="Diagram"
+/>
+</p>
+
 
 This basically means that **Bridge Regression**, which is regression with regularization $$q \in (1,2]$$, i.e. between Ridge and Lasso, does not have sharp corners. So it cannot perform Variable Selection.
 
@@ -230,9 +250,21 @@ So what do we want really out of our linear model?
 
 Turns out that Elastic-Net satisfies all 3 of those criterias. It can perform Variable Selection by having those sharp corners in its constraint region. It also has the grouping effect, as the constraint is strictly convex. Finally, it is also non-rotationally invariant. So Elastic-Net FTW. 
 
-<p align="center">
+<!-- <p align="center">
   <img src="/images/constraints_en.jpg" alt="Diagram" width="600">
+</p> -->
+
+<p align="center">
+<img 
+  src="{{ '/images/constraints_en.jpg' | relative_url }}"
+  data-light-src="{{ '/images/constraints_en.jpg' | relative_url }}"
+  data-dark-src="{{ '/images/constraints_en_dark.png' | relative_url }}"
+  alt="Diagram"
+  width="600"
+/>
 </p>
+
+
 I still use Ridge, though.
 
 ---

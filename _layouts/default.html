@@ -9,19 +9,76 @@
       <a href="{{ '/' | relative_url }}">{{ site.title }}</a>
     </div>
     
-    <div id="nav">
+    <!-- <div id="nav">
       <ul>
         <li><a href="{{ '/about' | relative_url }}">About</a></li>
         <li><a href="{{ '/blog' | relative_url }}">Blog</a></li>
         <li><a href="{{ '/publications' | relative_url }}">Publications</a></li>
         <li><a href="mailto:{{ site.email }}">{{ site.email }}</a></li>
         <li><a href="mailto:{{ site.email2 }}">{{ site.email2 }}</a></li>
-      </ul>
-    </div>
+        <li><button id="theme-toggle" aria-label="Toggle dark mode">◐</button></li>
+    </div> -->
+
+    <div id="nav">
+  <ul>
+    <li><a href="{{ '/about' | relative_url }}">About</a></li>
+    <li><a href="{{ '/blog' | relative_url }}">Blog</a></li>
+    <li><a href="{{ '/publications' | relative_url }}">Publications</a></li>
+    <li><a href="mailto:{{ site.email }}">{{ site.email }}</a></li>
+    <li><a href="mailto:{{ site.email2 }}">{{ site.email2 }}</a></li>
+
+    <!-- push this to the right -->
+    <li class="theme-toggle-wrapper">
+      <button id="theme-toggle" aria-label="Toggle dark mode">◐</button>
+    </li>
+  </ul>
+</div>
+
 
     <div id="content">
       {{ content }}
     </div>
   </div>
+
+  <script>
+    const toggle = document.getElementById('theme-toggle');
+    const body = document.body;
+    
+    // Check for saved theme preference or default to light
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    body.classList.add(currentTheme + '-theme');
+    
+    toggle.addEventListener('click', () => {
+      if (body.classList.contains('light-theme')) {
+        body.classList.remove('light-theme');
+        body.classList.add('dark-theme');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        body.classList.remove('dark-theme');
+        body.classList.add('light-theme');
+        localStorage.setItem('theme', 'light');
+      }
+      
+      // Toggle images
+      document.querySelectorAll('img[data-light-src]').forEach(img => {
+        if (body.classList.contains('dark-theme')) {
+          img.src = img.getAttribute('data-dark-src');
+        } else {
+          img.src = img.getAttribute('data-light-src');
+        }
+      });
+    });
+    
+    // Set correct images on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('img[data-light-src]').forEach(img => {
+        if (body.classList.contains('dark-theme')) {
+          img.src = img.getAttribute('data-dark-src');
+        } else {
+          img.src = img.getAttribute('data-light-src');
+        }
+      });
+    });
+  </script>
 </body>
 </html>

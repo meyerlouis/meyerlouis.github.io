@@ -41,7 +41,7 @@ $$\frac{\partial J}{\partial \mu_i}
 Set to 0:
 
 $$\sum_{x\in S_i} (x_i - \mu_i)
-        = 0 \iff \sum_{x\in S_i} x_i = \|S_i\|\mu_i \iff \mu_i = \frac{1}{\|S_i\|}\sum_{x\in S_i} x_i $$
+        = 0 \iff \sum_{x\in S_i} x_i = |S_i|\mu_i \iff \mu_i = \frac{1}{|S_i|}\sum_{x\in S_i} x_i $$
 
 
 **Initialization methods**
@@ -110,9 +110,9 @@ The extent to which the hierarchical structure produced by a dendogram actually 
 ---
 ## Choice of Distance functions
 - ***Minkowski Distance***: $d(x,y) = \Big( \sum_i \| x_i - _i\|^q\Big)^{1/q} $
-- ***Euclidean Distance*** for $q = 2$
-- ***Manhattan Distance*** for $q = 1$
-- ***Chebyshev Distance*** for $q \to \infty$
+    - ***Euclidean Distance*** for $q = 2$
+    - ***Manhattan Distance*** for $q = 1$
+    - ***Chebyshev Distance*** for $q \to \infty$
 - ***Mahalanobis Distance***: $$d(x,y) = \sqrt{(x-y)^\top \Sigma^{-1}(x-y)}$$
     - Covariance aware: computes ordinary Euclidean distance in the correlation and variance corrected space
     - Requires estimation of covariance matrix so can be unstable in high dimensions, and expensive

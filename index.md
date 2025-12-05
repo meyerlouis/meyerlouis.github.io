@@ -2,12 +2,25 @@
 layout: default
 title: Home
 ---
-<!-- 
-<div style="margin-top: 80px;">
-  <p style="font-size: 20px; line-height: 2.2;">
-    <a href="{{ '/about.html' | relative_url }}">About</a><br>
-    <a href="{{ '/blog.html' | relative_url }}">Blog</a><br>
-    <a href="{{ '/publications.html' | relative_url }}">Publications</a><br>
-    <a href="mailto:{{ site.email }}">{{ site.email }}</a>
-  </p>
-</div> -->
+
+<div id="random-image-container" style="text-align: center; margin-top: 60px;">
+  <!-- Filled by JavaScript -->
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const items = {{ site.data.home_images | jsonify }};
+    const chosen = items[Math.floor(Math.random() * items.length)];
+
+    const container = document.getElementById("random-image-container");
+
+    container.innerHTML = `
+      <img src="${chosen.image}" 
+           alt="Random image" 
+           style="max-width: ${chosen.custom_width}; display: block; margin: 0 auto;">
+       <p style="margin-top: 10px; font-size: 14px;">
+       <i>${chosen.title}</i>, ${chosen.artist} (${chosen.date})
+      </p>
+    `;
+  });
+</script>

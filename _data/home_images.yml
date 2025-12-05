@@ -1,0 +1,68 @@
+
+
+# - image: "images/home/stanczyk.jpg"
+#   title: "Stanczyk"
+#   artist: "Jan Matejko"
+#   date: "1862"
+#   custom_width: "650px"
+
+
+- image: "images/home/fishermen_turner.jpg"
+  title: "Fishermen at Sea"
+  artist: "J. M. W. Turner"
+  date: "1796"
+  custom_width: "650px"
+
+
+
+
+- image: "images/home/bierstadt_vesuvius.jpeg"
+  title: "Mount Vesuvius at Midnight"
+  artist: "Albert Bierstadt"
+  date: "1868"
+  custom_width: "650px"
+
+
+
+- image: "images/home/Alexander_Cyrus.jpg"
+  title: "Alexander at the Tomb of Cyrus the Great"
+  artist: "Pierre-Henri de Valenciennes"
+  date: "1796"
+  custom_width: "750px"
+
+
+- image: "images/home/russians_nolde.jpg"
+  title: "Shivering Russians"
+  artist: "Emil Nolde"
+  date: "1914"
+  custom_width: "550px"
+
+- image: "images/home/pechstein.jpg"
+  title: "In the dunes"
+  artist: "Max Pechstein"
+  date: "1911"
+  custom_width: "620px"
+
+
+
+- image: "images/home/philosopher_rembrandt.jpg"
+  title: "Philosopher in Meditation"
+  artist: "Rembrandt"
+  date: "	1632"
+  custom_width: "580px"
+
+
+- image: "images/home/pompeii.jpg"
+  title: "Pompeii"
+  artist: "Robert S. Duncanson"
+  date: "	1855"
+  custom_width: "370px"
+
+
+
+# - image: "images/home/stanczyk.jpg"
+#   title: "Stanczyk"
+#   artist: "Jan Matejko"
+#   date: "1862"
+
+

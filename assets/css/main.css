@@ -48,7 +48,7 @@ body {
 /* #nav ul {
   list-style: none;
 } */
- 
+
 #nav ul {
     display: flex;
     align-items: center;
@@ -167,7 +167,7 @@ a:hover {
 /* Code */
 code {
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  font-size: 14px;
+  font-size: 10px;
   background-color: #f6f8fa;
   padding: 3px 6px;
   border-radius: 3px;
@@ -177,10 +177,11 @@ pre {
   background-color: #f6f8fa;
   padding: 16px;
   overflow: auto;
-  font-size: 14px;
+  font-size: 11px;
   line-height: 1.45;
   border-radius: 6px;
-  margin: 30px 0;
+  margin: 30px auto;
+  width: 85%;
 }
 
 pre code {

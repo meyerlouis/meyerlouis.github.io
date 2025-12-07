@@ -2,7 +2,8 @@
 layout: default
 title: Blog
 ---
-Here are some articles I wrote. I wrote them for myself, as I find these subjects interesting. They also tend to come up in interviews for ML / quant positions, so now I can access my notes online from my phone, while waiting for my interviews at the onsites. 
+
+Here are some <a href="/misc/" style="color:inherit; text-decoration:none;">articles I wrote</a>. I wrote them for myself, as I find these subjects interesting. They also tend to come up in interviews for ML / quant positions, so now I can access my notes online from my phone, while waiting for my interviews at the onsites. 
 
 Feel free to send me an email if you believe I made a mistake or have omitted any important details.
 
@@ -14,6 +15,7 @@ Most of the content is generally coming directly from (no more than) a handful o
 
 <div id="posts">
   {% for post in site.posts %}
+    {% unless post.categories contains "misc" %}
     <div class="post-row">
       <div class="post-title">
         <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
@@ -23,5 +25,6 @@ Most of the content is generally coming directly from (no more than) a handful o
       {% endif %}
       <!-- <div class="meta">{{ post.date | date: "%B %d, %Y" }}</div> -->
     </div>
+    {% endunless %}
   {% endfor %}
 </div>

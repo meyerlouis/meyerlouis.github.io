@@ -282,7 +282,7 @@ Hui Zou, Trevor Hastie\
 [Paper](https://hastie.su.domains/Papers/B67.2%20(2005)%20301-320%20Zou%20&%20Hastie.pdf){:target="_blank"}
 
 **Variable selection via nonconcave penalized likelihood and its oracle properties** (2001)\
-Jianking Fan, Runze Li\
+Jianqing Fan, Runze Li\
 [Paper](https://fan.princeton.edu/sites/g/files/toruqf5476/files/documents/penlike.pdf){:target="_blank"}
 
 **Feature selection, L1 vs. L2 regularization, and rotational invariance** (2004)\

@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dependency and Discrepancy Measures in RKHS | Louis Meyer</title>
+<meta name="description" content="This blog post provides an introduction to kernel methods in modern statistical learning, starting from the foundational theory of reproducing kernel Hilbert...">
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true
+    },
+    TeX: {
+      equationNumbers: { autoNumber: "AMS" }
+    },
+    CommonHTML: {
+      linebreaks: { automatic: true, width: "container" }
+    },
+    "HTML-CSS": {
+      linebreaks: { automatic: true, width: "container" },
+      availableFonts: [],
+      preferredFont: null,
+      webFont: "TeX"
+    },
+    SVG: {
+      linebreaks: { automatic: true, width: "container" }
+    }
+  });
+</script>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<!-- Highlight.js -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-light.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+
+</head>
+<body>
+  <div id="wrapper">
+    <div id="name">
+      <a href="/">Louis Meyer</a>
+    </div>
+
+    <div id="nav">
+  <ul>
+    <li><a href="/about">About</a></li>
+    <li><a href="/blog">Blog</a></li>
+    <li><a href="/publications">Publications</a></li>
+    <li><a href="mailto:louismeyer.lcm@gmail.com">louismeyer.lcm@gmail.com</a></li>
+    <li><a href="mailto:louis.meyer@warwick.ac.uk">louis.meyer@warwick.ac.uk</a></li>
+
+    <!-- push this to the right -->
+    <li class="theme-toggle-wrapper">
+      <button id="theme-toggle" aria-label="Toggle dark mode">◐</button>
+    </li>
+  </ul>
+</div>
+
+
+    <div id="content">
+      <div id="post">
+  <div id="post-header">
+    <h1>Dependency and Discrepancy Measures in RKHS</h1>
+    <!-- <p class="post-date">January 06, 2000</p> -->
+  </div>
+
+  <div id="post-content">
+    <p><em>This blog post provides an introduction to kernel methods in modern statistical learning, starting from the foundational theory of reproducing kernel Hilbert spaces (RKHS), then developing on the theory of mean embeddings and covariance operators. Three major kernel-based hypothesis testing frameworks: Maximum Mean Discrepancy, the Hilbert-Schmidt Independence Criterion, and the Kernel Stein Discrepancy are introduced.</em></p>
+
+<h2 id="1-primer-on-kernels">1. Primer on Kernels</h2>
+
+<h3 id="11-rkhs-and-properties-of-kernels">1.1 RKHS and Properties of Kernels</h3>
+
+<p>This section aims to be an introduction to kernel functions, reproducing kernel Hilbert spaces (RKHS), and their main theorems and properties, which are direct results of functional analysis. It is intended to be introductory and to present these concepts from a theoretical standpoint. Subsequent sections will emphasize applied and practical aspects of kernel methods in statistical frameworks. For a more complete and rigorous treatment, we refer to Smola &amp; Schölkopf (1998) and Berlinet &amp; Thomas-Agnan (2011).</p>
+
+<h4 id="111-kernel">1.1.1 Kernel</h4>
+
+<p><strong>Definition (Kernel).</strong> A function $k : \mathcal{X} \times \mathcal{X} \rightarrow \mathbb{R}$ is a <em>kernel</em> if it is symmetric and positive semi-definite: for any $n \in \mathbb{N}$, points ${x_1, \ldots, x_n} \subset \mathcal{X}$, and coefficients $c_1, \ldots, c_n \in \mathbb{R}$,</p>
+
+\[\sum_{i=1}^{n} \sum_{j=1}^{n} c_i c_j k(x_i, x_j) \geq 0.\]
+
+<p>Equivalently, the Gram matrix $\mathbf{K} \in \mathbb{R}^{n \times n}$ with $K_{ij} = k(x_i, x_j)$ is positive semi-definite for any finite point set.</p>
+
+<p><strong>Remark.</strong> Every kernel admits a feature map representation $k(x, x’) = \langle \phi(x), \phi(x’) \rangle_{\mathcal{H}}$ for some Hilbert space $\mathcal{H}$, which will be formalized via the associated RKHS.</p>
+
+<p><strong>Example.</strong> Standard kernels on $\mathbb{R}^d$ include the linear kernel $k(x, x’) = x^\top x’$, the polynomial kernel $k(x, x’) = (x^\top x’ + c)^p$, the RBF kernel $k(x, x’) = \exp(-|x - x’|^2/2\sigma^2)$, and the Laplacian kernel $k(x, x’) = \exp(-|x - x’|/\sigma)$.</p>
+
+<p><strong>Proposition (Closure and composition properties).</strong> Kernels are closed under positive linear combinations ($\alpha k_1 + \beta k_2$ for $\alpha, \beta \geq 0$), products ($k_1 \cdot k_2$), pointwise limits, and tensor products. Moreover, if $k$ is a kernel on $\mathcal{X}$ and $\psi: \mathcal{Y} \rightarrow \mathcal{X}$, then $k(\psi(\cdot), \psi(\cdot))$ is a kernel on $\mathcal{Y}$. Products preserve universality and characteristic properties.</p>
+
+<h4 id="112-rkhs">1.1.2 RKHS</h4>
+
+<p><strong>Definition (Hilbert Space).</strong> A <em>Hilbert space</em> $\mathcal{H}$ is a complete inner product space, i.e., a vector space equipped with an inner product $\langle \cdot, \cdot \rangle_{\mathcal{H}}$ such that every Cauchy sequence converges in the induced norm \(\|f\|_{\mathcal{H}} = \sqrt{\langle f, f \rangle_{\mathcal{H}}}\).</p>
+
+<p><strong>Definition (Reproducing Kernel Hilbert Space).</strong> A Hilbert space $\mathcal{H}$ of real-valued functions $f: \mathcal{X} \rightarrow \mathbb{R}$ is a <em>reproducing kernel Hilbert space</em> (RKHS) if point evaluation functionals are continuous. That is, for each $x \in \mathcal{X}$, the evaluation functional $\delta_x: \mathcal{H} \rightarrow \mathbb{R}$ defined by $\delta_x(f) = f(x)$ is bounded.</p>
+
+<p><strong>Theorem (Riesz Representation).</strong> Let $\mathcal{H}$ be a Hilbert space and $L: \mathcal{H} \rightarrow \mathbb{R}$ a bounded linear operator. Then there exists a unique element $h \in \mathcal{H}$ such that $Lf = \langle f, h \rangle_{\mathcal{H}}$ for all $f \in \mathcal{H}$.</p>
+
+<p><strong>Proposition (Reproducing kernel).</strong> By the Riesz representation theorem, for each $x \in \mathcal{X}$, there exists a unique element $k(\cdot, x) \in \mathcal{H}$ such that</p>
+
+\[f(x) = \langle f, k(\cdot, x) \rangle_{\mathcal{H}} \quad \text{for all } f \in \mathcal{H}.\]
+
+<p>This is the <em>reproducing property</em>. The function $k: \mathcal{X} \times \mathcal{X} \rightarrow \mathbb{R}$ defined by $k(x, x’) = \langle k(\cdot, x), k(\cdot, x’) \rangle_{\mathcal{H}}$ is called the <em>reproducing kernel</em> of $\mathcal{H}$. The kernel $k$ is uniquely determined by $\mathcal{H}$, and conversely, $\mathcal{H}$ is uniquely determined by $k$.</p>
+
+<p><strong>Theorem (Moore-Aronszajn).</strong> There is a one-to-one correspondence between kernels on $\mathcal{X}$ and RKHSs of real-valued functions on $\mathcal{X}$. Given any kernel $k$, there exists a unique RKHS $\mathcal{H}_k$ with reproducing kernel $k$. Conversely, every RKHS uniquely determines its reproducing kernel.</p>
+
+<p><strong>Remark (The RKHS norm).</strong> The RKHS norm can be interpreted through the reproducing property. For \(f \in \mathcal{H}_k\), we can write $f$ as a (possibly infinite) linear combination of kernel evaluations. The norm $|f|_{\mathcal{H}_k}$ measures the complexity or smoothness of $f$ in a way that depends on the choice of kernel $k$. Functions that align with the kernel structure have smaller norms.</p>
+
+<p><strong>Definition (Kernel integral operator).</strong> Let $\mu$ be a measure on $\mathcal{X}$. The <em>kernel integral operator</em> $T_k: L^2(\mathcal{X}, \mu) \rightarrow L^2(\mathcal{X}, \mu)$ associated with kernel $k$ is defined by</p>
+
+\[(T_k f)(x) = \int_{\mathcal{X}} k(x, x') f(x') \, d\mu(x').\]
+
+<p>Under appropriate conditions, $T_k$ is a compact, self-adjoint, positive operator.</p>
+
+<p><strong>Theorem (Mercer).</strong> Let $\mathcal{X} \subset \mathbb{R}^d$ be compact, $\mu$ a finite Borel measure with support $\mathcal{X}$, and $k: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ a continuous positive definite kernel. Then the integral operator $T_k$ on $L^2(\mathcal{X}, \mu)$ is compact, self-adjoint, and positive, with a countable set of eigenvalues \(\{\lambda_i\}_{i=1}^{\infty}\) (with $\lambda_i \geq 0$, $\lambda_i \to 0$) and corresponding orthonormal eigenfunctions ${\phi_i}_{i=1}^{\infty}$ forming an orthonormal basis of $L^2(\mathcal{X}, \mu)$. The kernel admits the absolutely and uniformly convergent representation</p>
+
+\[k(x, x') = \sum_{i=1}^{\infty} \lambda_i \phi_i(x) \phi_i(x'), \quad \forall x, x' \in \mathcal{X}.\]
+
+<p>The RKHS \(\mathcal{H}_k\) consists of all functions $f \in L^2(\mathcal{X}, \mu)$ with expansion $f = \sum_{i=1}^{\infty} \alpha_i \phi_i$ satisfying</p>
+
+\[\|f\|_{\mathcal{H}_k}^2 = \sum_{i=1}^{\infty} \frac{\alpha_i^2}{\lambda_i} &lt; \infty,\]
+
+<p>where $\alpha_i = \langle f, \phi_i \rangle_{L^2(\mathcal{X}, \mu)}$. This norm follows from the orthogonal expansion and the identity \(\langle \phi_i, \phi_j \rangle_{\mathcal{H}_k} = \delta_{ij}/\lambda_i\).</p>
+
+<p>Note that any function in the RKHS $\mathcal{H}$ can be written as a linear combination of the eigenfunctions, via Mercer’s theorem, i.e. $f = \sum_{i=1}^{\infty} \alpha_i \phi_i(x) \quad \forall f \in \mathcal{H}_k$.</p>
+
+<p><strong>Remark (Isometric views of the RKHS).</strong> Mercer’s theorem reveals three equivalent perspectives on the RKHS:</p>
+
+<ol>
+  <li>The <em>function space view</em>: $\mathcal{H}_k$ as a space of functions with the reproducing property</li>
+  <li>The <em>feature space view</em>: Functions as elements in a potentially infinite-dimensional Hilbert space with feature map $\phi: x \mapsto (\sqrt{\lambda_i}\phi_i(x))_{i=1}^{\infty}$, where $k(x, x’) = \langle \phi(x), \phi(x’) \rangle$</li>
+  <li>The <em>sequence space view</em>: $\mathcal{H}_k$ is isometrically isomorphic to the weighted $\ell^2$ space $\mathcal{H}_k \cong \ell^2(\lambda) = {(\alpha_i): \sum_i \alpha_i^2/\lambda_i &lt; \infty}$</li>
+</ol>
+
+<p><strong>Remark (The kernel trick).</strong> In practice, kernels provide a powerful analytical tool for performing comparisons through inner products in potentially infinite-dimensional feature spaces, without ever having to explicitly augment the data or compute the feature map $\phi$. Given data points $x_1, \ldots, x_n \in \mathcal{X}$, we can compute inner products in the feature space simply by evaluating $k(x_i, x_j)$. This “kernel trick” allows algorithms that depend only on inner products (such as ridge regression, SVMs, and PCA) to be kernelized, operating implicitly in high- or infinite-dimensional spaces while maintaining computational tractability. The choice of kernel thus encodes prior knowledge about what constitutes similarity in the problem domain.</p>
+
+<p><strong>Proposition (Derivative reproducing).</strong> Let $k$ be a smooth kernel such that all partial derivatives $\partial^{\alpha} k(x, x’)$ exist and are continuous. If $f \in \mathcal{H}_k$ is sufficiently smooth, then the derivatives of $f$ can be computed via</p>
+
+\[\partial^{\alpha} f(x) = \langle f, \partial^{\alpha}_x k(\cdot, x) \rangle_{\mathcal{H}_k},\]
+
+<p>where the derivative is taken with respect to the first argument of $k$. This extends the reproducing property to derivatives, which is particularly useful in operator learning and solving differential equations in RKHS.</p>
+
+<h3 id="12-mean-embedding">1.2 Mean Embedding</h3>
+
+<p><strong>Definition (Kernel Mean Embedding).</strong> Given a kernel $k$ with reproducing kernel Hilbert space (RKHS) \(\mathcal{H}_k\), the kernel mean embedding of a probability measure \(\mathbb{P} \in \mathcal{M}^1_+(\mathcal{X})\) is the element \(\mu_\mathbb{P} \in \mathcal{H}_k\) defined by</p>
+
+\[\mu_\mathbb{P} = \mathbb{E}_{X \sim \mathbb{P}}[k(X, \cdot)] = \int_{\mathcal{X}} k(x, \cdot) \, \mathrm{d}\mathbb{P}(x)\]
+
+<p>Using the reproducing property of \(\mathcal{H}_k\), \(\mu_\mathbb{P}\) is the unique element of \(\mathcal{H}_k\) satisfying \(\langle f, \mu_\mathbb{P} \rangle_{\mathcal{H}_k} = \mathbb{E}_{X \sim \mathbb{P}}[f(X)] \quad \forall f \in \mathcal{H}_k\).</p>
+
+<p>In particular, for $f = k(\cdot, x)$, this yields \(\mu_\mathbb{P}(x) = \langle \mu_\mathbb{P}, k(\cdot, x) \rangle_{\mathcal{H}_k} = \mathbb{E}_{X \sim \mathbb{P}}[k(X, x)]\).</p>
+
+<p>Given an i.i.d. sample ${x_1,\dots,x_m}$ from $\mathbb{P}$, the empirical kernel mean embedding is</p>
+
+\[\hat{\mu}_\mathbb{P} = \frac{1}{m} \sum_{i=1}^m k(x_i, \cdot)\]
+
+<!-- ![Diagram](/images/KMEx_light.png) -->
+
+<p align="center">
+<img src="/images/KMEx_light.png" data-light-src="/images/KMEx_light.png" data-dark-src="/images/KMEx_dark.png" alt="Diagram" />
+</p>
+
+<p><strong>Remark (Existence).</strong> The embedding \(\mu_\mathbb{P}\) exists in \(\mathcal{H}_k\) when \(\mathbb{E}_{X \sim \mathbb{P}}[\sqrt{k(X,X)}] &lt; \infty\), which holds automatically for bounded kernels.</p>
+
+<p><strong>Definition (Characteristic Kernel).</strong> A kernel $k$ is <em>characteristic</em> if the mean embedding map $\mathbb{P} \mapsto \mu_\mathbb{P}$ is injective, meaning $\mu_\mathbb{P} = \mu_\mathbb{Q}$ if and only if $\mathbb{P} = \mathbb{Q}$.</p>
+
+<h3 id="13-tensor-product-space-and-covariance-operators">1.3 Tensor Product Space and Covariance Operators</h3>
+
+<h4 id="131-tensor-product-space">1.3.1 Tensor Product Space</h4>
+
+<p>Let $(\mathcal{H}, k)$ and $(\mathcal{G}, \ell)$ be two reproducing kernel Hilbert spaces over input spaces $\mathcal{X}$ and $\mathcal{Y}$ respectively. The tensor product space $\mathcal{G} \otimes \mathcal{H}$ provides a natural framework for studying joint distributions and dependence structures between random variables taking values in $\mathcal{X}$ and $\mathcal{Y}$.</p>
+
+<p><strong>Definition (Tensor Product RKHS).</strong> The tensor product space $\mathcal{G} \otimes \mathcal{H}$ is the completion of the linear span of elementary tensors ${g \otimes h : g \in \mathcal{G}, h \in \mathcal{H}}$ under the inner product</p>
+
+\[\langle g_1 \otimes h_1, g_2 \otimes h_2 \rangle_{\mathcal{G} \otimes \mathcal{H}} = \langle g_1, g_2 \rangle_{\mathcal{G}} \langle h_1, h_2 \rangle_{\mathcal{H}}.\]
+
+<p>The space $\mathcal{G} \otimes \mathcal{H}$ is itself an RKHS over $\mathcal{Y} \times \mathcal{X}$ with reproducing kernel $k \otimes \ell$:</p>
+
+\[(k \otimes \ell)((y,x), (y',x')) = k(x,x') \ell(y,y').\]
+
+<p>Any functional tensor $g \otimes h$ can be interpreted as a linear operator from $\mathcal{H}$ to $\mathcal{G}$ via the mapping</p>
+
+\[(g \otimes h)(f) = \langle h, f \rangle_{\mathcal{H}} g \quad \text{for } f \in \mathcal{H}.\]
+
+<p>This operator takes an element $f \in \mathcal{H}$, computes its inner product with $h$ in the RKHS $\mathcal{H}$ (yielding a scalar), and scales the element $g \in \mathcal{G}$ by this scalar. Using the <em>reproducing property</em> with feature maps $\phi(y) = \ell(y, \cdot) \in \mathcal{G}$ and $\Phi(x) = k(x, \cdot) \in \mathcal{H}$, we have</p>
+
+\[(\phi(y) \otimes \Phi(x))(f) = \langle \Phi(x), f \rangle_{\mathcal{H}} \phi(y) = f(x) \phi(y).\]
+
+<p>For any $g, f \in \mathcal{G}$ and $u, v \in \mathcal{H}$,</p>
+
+\[\langle g, (u \otimes v)(f) \rangle_{\mathcal{G}} = \langle g, \langle v, f \rangle_{\mathcal{H}} u \rangle_{\mathcal{G}} = \langle v, f \rangle_{\mathcal{H}} \langle g, u \rangle_{\mathcal{G}} = \langle u \otimes v, g \otimes f \rangle_{\mathcal{G} \otimes \mathcal{H}}.\]
+
+<p>This identity shows that evaluating the operator $u \otimes v$ on $f$ and taking the inner product with $g$ in $\mathcal{G}$ is equivalent to computing the tensor product inner product of $u \otimes v$ with $g \otimes f$ in $\mathcal{G} \otimes \mathcal{H}$.</p>
+
+<p><strong>Definition (Hilbert-Schmidt Operators).</strong> Let the bounded linear operator \(C: \mathcal{H} \to \mathcal{G}\) on separable Hilbert Spaces \(\mathcal{H}\) and \(\mathcal{G}\) with orthonormal basis \((h_i)_{i \in I}\) and \((g_j)_{j \in J}\) respectively. Define the Hilbert–Schmidt norm of $C$ by</p>
+
+\[\begin{align*}
+\|C\|_{\mathrm{HS}}^{2} &amp;= \sum_{i \in I} \|C h_i\|_{\mathcal{G}}^{2} \\
+&amp;= \sum_{i \in I} \sum_{j \in J} \big| \langle C h_i , g_j \rangle_{\mathcal{G}} \big|^{2}.
+\end{align*}\]
+
+<p>The Hilbert-Schmidt norm \(\|\cdot\|_{\text{HS}}\) is independent of the choice of orthonormal basis \(I, J\), which are assumed to be either finite or countably infinite. An operator $C$ is called a <em>Hilbert–Schmidt operator</em> if \(\|C\|_{\mathrm{HS}} &lt; \infty\).</p>
+
+<h4 id="132-covariance-operators">1.3.2 Covariance Operators</h4>
+
+<p>We now introduce the concepts of Cross-Covariance operator on reproducing kernel Hilbert spaces, as well as their normalized and conditional versions. The Cross-Covariance operator is a generalization of the covariance matrix to infinite dimensional feature spaces, used to capture dependence (and conditional dependence) of random variables under non-linear feature maps. The theoretical foundations and practical applications of Cross-Covariance operators have been introduced and thoroughly studied by K. Fukumizu, and we refer to his work for further details: Fukumizu et al. (2004, 2007, 2009). Most of the following definitions can be viewed as equivalent formulations of covariance, correlations and conditional correlations measures in Euclidean spaces generalized through non-linear kernels in reproducing kernel Hilbert spaces.</p>
+
+<p>Let \(\mathcal{H}_\mathcal{X}\) and \(\mathcal{H}_\mathcal{Y}\) be two RKHS of functions on Borel sets $\mathcal{X}$ and $\mathcal{Y}$, with reproducing kernels $k_\mathcal{X}$ and $k_\mathcal{Y}$, respectively. Assuming integrability, i.e.</p>
+
+\[\mathbb{E}[k_\mathcal{X}(X,X)]&lt; \infty \quad\forall X \in \mathcal{X}, \quad \text{and} \quad \mathbb{E}[k_\mathcal{Y}(Y,Y)]&lt; \infty \quad\forall Y \in \mathcal{Y}\]
+
+<p>we can define the cross-covariance operator of $(X,Y)$:</p>
+
+<p><strong>Definition (Cross-Covariance Operator).</strong> The <em>centred cross-covariance operator</em> of $(X,Y)$, denoted as $\Sigma_{YX}$, is an operator from \(\mathcal{H}_\mathcal{X}\) to \(\mathcal{H}_\mathcal{Y}\) defined, for all \(f \in \mathcal{H}_\mathcal{X}\) and \(g \in \mathcal{H}_\mathcal{Y}\), by:</p>
+
+\[\begin{align*}
+\langle g, \Sigma_{YX}f\rangle_{\mathcal{H}_\mathcal{Y}} &amp;= \text{Cov}[f(X), g(Y)] \\
+&amp;= \mathbb{E}_{YX}[(f(X) - \mathbb{E}_{X \sim \mathbb{P}_X}[f(X)]) \cdot (g(Y) - \mathbb{E}_{Y \sim \mathbb{P}_Y}[g(Y)])] \\
+&amp;= \mathbb{E}_{YX}[\langle f, k_\mathcal{X}(X, \cdot) - \mu_{\mathbb{P}_X}\rangle \langle g, k_\mathcal{Y}(Y, \cdot) - \mu_{\mathbb{P}_Y}\rangle ] \\
+&amp;= \mathbb{E}_{YX}[\langle f \otimes g, (k_\mathcal{X}(X, \cdot) - \mu_{\mathbb{P}_X}) \otimes (k_\mathcal{Y}(Y, \cdot) - \mu_{\mathbb{P}_Y})\rangle ]
+\end{align*}\]
+
+<p>Using the <em>Riesz Representation Theorem</em>, one can also write:</p>
+
+\[\Sigma_{YX} = \mathbb{E}_{YX}[(k_\mathcal{X}(X, \cdot) - \mu_{\mathbb{P}_X}) \otimes (k_\mathcal{Y}(Y, \cdot) - \mu_{\mathbb{P}_Y})]\]
+
+<p>The assumptions of integrability implies that the <em>cross-covariance operator</em> is Hilbert Schmidt. The operator represents higher-order correlations of $X$ and $Y$ through feature maps $f(X)$ and $g(Y)$. Analogously to the variance in Euclidean spaces, if $X = Y$, $\Sigma_{XX}$ is called the <em>covariance operator</em>. The <em>cross-covariance operator</em> can be used to determine the independence of $X$ and $Y$: $\Sigma_{YX} = 0 \iff X$ and $Y$ are independent.</p>
+
+<p><strong>Definition (Normalized Cross-Covariance Operator).</strong> The <em>normalized cross-covariance operator</em> of $(X,Y)$, denoted as $V_{YX}$, is a unique bounded operator such that:</p>
+
+\[\Sigma_{YX} = \Sigma_{YY}^{1/2}V_{YX}\Sigma_{XX}^{1/2}\]
+
+<p>The <em>normalized cross-covariance operator</em> can be seen as an analogue to the correlation, and similarly, its Hilbert Schmidt norm is less than or equal than 1.</p>
+
+<p>Finally, if we consider another random variable $Z$ on \(\mathcal{Z}\), and the RKHS \(\mathcal{H}_{\mathcal{Z}}\) with corresponding kernel \(k_\mathcal{Z}\), we can define the <em>normalized conditional cross-covariance operator</em>.</p>
+
+<p><strong>Definition (Normalized Conditional Cross-Covariance Operator).</strong> The <em>normalized conditional cross-covariance operator</em> of $X$ and $Y$ given $Z$, denoted as \(V_{YX\|Z}\), is defined as:</p>
+
+\[V_{YX|Z} = V_{YX} - V_{YZ}V_{XZ}\]
+
+<p>Alternatively, it can also be defined as:</p>
+
+\[V_{YX|Z} = \Sigma_{YY}^{-1/2} \Sigma_{YX|Z} \Sigma_{XX}^{-1/2} \qquad \text{with} \qquad \Sigma_{YX|Z} = (\Sigma_{YX} -\Sigma_{YZ}\Sigma_{ZZ}^{-1}\Sigma_{ZX})\]
+
+<p>Similarly to the cross-covariance operator, we have \(\Sigma_{YX\|Z}= 0 \iff X\) and $Y$ are independent given $Z$.</p>
+
+<p>Empirically, given i.i.d samples \((x_i, y_i)_{i=1}^m\), we can denote \(k_\mathcal{X}(x_i, \cdot) = \varphi(x_i)\) and \(k_\mathcal{Y}(y_i, \cdot) = \psi(y_i)\). Now define</p>
+
+\[\hat{\mu}_X = \frac{1}{m} \sum_{i=1}^m  \varphi(x_i) \qquad \text{and} \qquad \hat{\mu}_Y = \frac{1}{m} \sum_{i=1}^m  \psi(y_i)\]
+
+<p>the empirical kernel mean embeddings of $X$ and $Y$. Then the empirical cross-covariance operator is</p>
+
+\[\widehat{\Sigma}_{YX} = \frac{1}{m} \sum_{i=1}^m (\varphi(x_i) - \hat{\mu}_X) \otimes (\psi(y_i) - \hat{\mu}_Y)\]
+
+<p>We often see the empirical cross-covariance operator denoted in matrix form, using \(\Phi = [\varphi(x_1), \dots, \varphi(x_m)]\) and \(\Psi = [\psi(y_1), \dots, \psi(y_m)]\) the feature matrices in \(\mathcal{H}_{\mathcal{X}}\) and \(\mathcal{H}_{\mathcal{Y}}\) respectively, and \(H = I - \frac{1}{m}\mathbf{1}\mathbf{1}^\top\) the centering matrix. Then</p>
+
+\[\widehat{\Sigma}_{YX} = \frac{1}{m} \Phi H \Psi^\top\]
+
+<hr />
+
+<h2 id="2-testing-with-kernels">2. Testing with Kernels</h2>
+
+<h3 id="21-maximum-mean-discrepancy-mmd">2.1 Maximum Mean Discrepancy (MMD)</h3>
+
+<h4 id="211-theory">2.1.1 Theory</h4>
+
+<p>The Maximum Mean Discrepancy is a statistic to test whether two distributions $\mathbb{P}$ and $\mathbb{Q}$ differ based on samples drawn from each. This is a <em>two-sample-problem</em>, and our goal is to test whether $\mathbb{P} = \mathbb{Q}$, using the MMD, an integral probability metric. The MMD uses directly the Kernel Mean Embedding introduced in section 1.2 in order to compare the two distributions.</p>
+
+<p>Formally, we set up the problem as:</p>
+
+<p>For two probability measures \(\mathbb{P}\) and \(\mathbb{Q}\) defined on a metric space \(\mathcal{X}\), \(\mathbb{P} = \mathbb{Q} \iff \mathbb{E}_\mathbb{P}[f(x)] = \mathbb{E}_\mathbb{Q}[f(x)] \; \forall f \in C(\mathcal{X})\), \(C(\mathcal{X})\) being the set of continuous bounded functions on \(\mathcal{X}\). We now define the test-statistic based on the class of functions in the unit ball of a Reproducing Kernel Hilbert Space \(\mathcal{H}_k\) as:</p>
+
+<p><strong>Definition (Maximum Mean Discrepancy).</strong></p>
+
+\[\text{MMD}_k(\mathbb{P},\mathbb{Q} ) := \sup_{\substack{f \in \mathcal{H}_k \\ \|f\|_{\mathcal{H}_k} \leq 1}} \left( \mathbb{E}_{X \sim \mathbb{P}}[f(x)] - \mathbb{E}_{Y \sim \mathbb{Q}}[f(y)] \right)\]
+
+<p>The restriction to the unit ball \(\|f\|_{\mathcal{H}_k} \leq 1\) serves two purposes. It prevents the supremum from being infinite by bounding the function class; and more importantly, it ensures that the MMD measures genuine distributional differences rather than differences that could be amplified by arbitrary scaling. The unit ball constraint makes the MMD a proper metric, satisfying the triangle inequality to provide a meaningful notion of distance.</p>
+
+<p>Using the reproducing property, and writing \(\text{MMD}_k(\mathbb{P},\mathbb{Q} )\) as \(\text{MMD}_k\), we obtain:</p>
+
+\[\text{MMD}_k = \sup_{\substack{f \in \mathcal{H}_k \\ \|f\|_{\mathcal{H}_k} \leq 1}} \langle f, \mu_\mathbb{P} - \mu_\mathbb{Q} \rangle_{\mathcal{H}_k} = \|\mu_\mathbb{P} - \mu_\mathbb{Q}\|_{\mathcal{H}_k}\]
+
+<p>This result follows from the Cauchy-Schwarz inequality, where the supremum of \(\langle f, g \rangle_{\mathcal{H}_k}\) over unit vectors $f$ is achieved when $f$ is aligned with $g$. So the MMD can be simply defined as the RKHS norm of the difference between mean embeddings. If the distributions are identical, their mean embeddings should coincide and the MMD should be 0.</p>
+
+<p>Expanding the squared MMD, we can now obtain the kernel-based expression:</p>
+
+\[\begin{align*}
+\text{MMD}^2_k &amp;= \|\mu_\mathbb{P} - \mu_\mathbb{Q}\|^2_{\mathcal{H}_k} \\
+&amp;= \langle \mu_\mathbb{P} - \mu_\mathbb{Q}, \mu_\mathbb{P} - \mu_\mathbb{Q} \rangle_{\mathcal{H}_k} \\
+&amp;= \langle \mu_\mathbb{P}, \mu_\mathbb{P} \rangle_{\mathcal{H}_k} - 2\langle \mu_\mathbb{P}, \mu_\mathbb{Q} \rangle_{\mathcal{H}_k} + \langle \mu_\mathbb{Q}, \mu_\mathbb{Q} \rangle_{\mathcal{H}_k} \\
+&amp;= \mathbb{E}_{X,X' \sim \mathbb{P}}[k(X, X')] - 2\mathbb{E}_{X \sim \mathbb{P}, Y \sim \mathbb{Q}}[k(X, Y)] + \mathbb{E}_{Y,Y' \sim \mathbb{Q}}[k(Y, Y')]
+\end{align*}\]
+
+<p>In practice, we work with the squared MMD for computational purposes. We can estimate it directly from samples without having to compute the feature maps, or the mean embeddings explicitly. This is another instance of the kernel trick, where we can use kernel evaluations instead of manually computing the inner products between potentially infinite-dimensional feature maps.</p>
+
+<!-- ![Diagram](/images/KMExy_light.png) -->
+
+<p align="center">
+<img src="/images/KMExy_light.png" data-light-src="/images/KMExy_light.png" data-dark-src="/images/KMExy_dark.png" alt="Diagram" />
+</p>
+
+<p><strong>Theorem (Characteristic Kernels and MMD).</strong> If $k$ is a characteristic kernel on \(\mathcal{X}\), then \(\text{MMD}_k(\mathbb{P}, \mathbb{Q}) = 0\) if and only if \(\mathbb{P} = \mathbb{Q}\). Thus, for characteristic kernels, the MMD defines a proper metric on the space of probability measures.</p>
+
+<p>This theorem essentially guarantees the validity of the test-statistic. We can reject the null hypothesis \(\mathbb{P} = \mathbb{Q}\) based on a large MMD value.</p>
+
+<h4 id="212-empirical-estimation">2.1.2 Empirical Estimation</h4>
+
+<p>Given finite samples \(\{x_1, \ldots, x_m\} \sim \mathbb{P}\) and \(\{y_1, \ldots, y_n\} \sim \mathbb{Q}\), we need to estimate \(\text{MMD}^2_k(\mathbb{P}, \mathbb{Q})\) from data. Substituting the empirical mean embeddings into the quadratic form expression yields the natural empirical estimator.</p>
+
+<p><strong>Biased V-Statistic Estimator</strong></p>
+
+<p>The V-statistic is obtained by directly plugging the empirical mean embeddings into the population MMD$^2$ formula:</p>
+
+\[\widehat{\text{MMD}}_v^2 = \frac{1}{m^2} \sum_{i,j=1}^m k(x_i,x_j) - \frac{2}{mn} \sum_{i=1}^{m} \sum_{j=1}^{n} k(x_i,y_j) + \frac{1}{n^2} \sum_{i,j=1}^n k(y_i,y_j).\]
+
+<p>This estimator is the most natural empirical analog of the population quantity and has a simple interpretation: it computes the average kernel similarity within each sample and between samples. The V-statistic can be efficiently computed using matrix operations: if \(\mathbf{K}_{XX} \in \mathbb{R}^{m \times m}\), \(\mathbf{K}_{YY} \in \mathbb{R}^{n \times n}\), and \(\mathbf{K}_{XY} \in \mathbb{R}^{m \times n}\) are the kernel Gram matrices, then</p>
+
+\[\widehat{\text{MMD}}_v^2 = \frac{1}{m^2} \mathbf{1}^\top \mathbf{K}_{XX} \mathbf{1} - \frac{2}{mn} \mathbf{1}^\top \mathbf{K}_{XY} \mathbf{1} + \frac{1}{n^2} \mathbf{1}^\top \mathbf{K}_{YY} \mathbf{1}\]
+
+<p><strong>Unbiased U-Statistic Estimator</strong></p>
+
+<p>To obtain an unbiased estimator, we exclude the diagonal terms by restricting summations to distinct indices:</p>
+
+\[\widehat{\text{MMD}}_u^2 = \frac{1}{m(m-1)} \sum_{\substack{i,j=1 \\ i \neq j}}^m k(x_i, x_j) - \frac{2}{mn} \sum_{i=1}^{m} \sum_{j=1}^{n} k(x_i, y_j) + \frac{1}{n(n-1)} \sum_{\substack{i,j=1 \\ i \neq j}}^n k(y_i, y_j).\]
+
+<p>This estimator is unbiased: \(\mathbb{E}[\widehat{\text{MMD}}_u^2] = \text{MMD}^2(\mathbb{P}, \mathbb{Q})\) exactly for all sample sizes. It is preferred when exact unbiasedness is important, such as in small-sample settings or when theoretical guarantees on Type I error rates are needed. Like the biased estimator, it can be computed efficiently with matrix operations:</p>
+
+\[\widehat{\text{MMD}}_u^2 = \frac{1}{m(m-1)} \mathbf{1}^\top \bar{\mathbf{K}}_{XX} \mathbf{1} - \frac{2}{mn} \mathbf{1}^\top \bar{\mathbf{K}}_{XY} \mathbf{1} + \frac{1}{n(n-1)} \mathbf{1}^\top \bar{\mathbf{K}}_{YY} \mathbf{1},\]
+
+<p>where \(\bar{\mathbf{K}}_{XX}\), \(\bar{\mathbf{K}}_{XY}\) and \(\bar{\mathbf{K}}_{YY}\) denote the Gram matrices \(\mathbf{K}_{XX}\), \(\mathbf{K}_{XY}\), and \(\mathbf{K}_{YY}\), with diagonal entries set to 0.</p>
+
+<p>The test thresholds used are found using the Pearson curve (fitting on its first four moments) and bootstrap methods to estimate the distribution of the statistic under the null hypothesis. Gretton et al. (2012) conclude that the Pearson curve method generally provides a more accurate estimate of the threshold for low sample sizes while the two methods provide similar estimates for larger sample sizes, thus making the Bootstrap method preferable as its computational cost is $O(m^2)$ compared to $O(m^3)$ for the Pearson Curves.</p>
+
+<h3 id="22-hilbert-schmidt-independence-criterion-hsic">2.2 Hilbert-Schmidt Independence Criterion (HSIC)</h3>
+
+<h4 id="221-theory">2.2.1 Theory</h4>
+
+<p>The Hilbert-Schmidt Independence Criterion (HSIC) is a kernel-based measure of statistical dependence between two random variables. While MMD tests whether two distributions are identical, HSIC tests whether two random variables are independent by measuring the Hilbert-Schmidt norm of their cross-covariance operator introduced in Section 1.3.2.</p>
+
+<p>For random variables \(X \in \mathcal{X}\) and \(Y \in \mathcal{Y}\) with joint distribution \(\mathbb{P}_{XY}\) and marginals \(\mathbb{P}_X\) and \(\mathbb{P}_Y\), independence is characterized by \(\mathbb{P}_{XY} = \mathbb{P}_X \otimes \mathbb{P}_Y\). The cross-covariance operator $\Sigma_{YX}$ captures the dependence structure between $X$ and $Y$ in the tensor product space \(\mathcal{H}_\mathcal{Y} \otimes \mathcal{H}_\mathcal{X}\).</p>
+
+<p><strong>Definition (Hilbert-Schmidt Independence Criterion).</strong> Let \(k_\mathcal{X}\) and \(k_\mathcal{Y}\) be kernels on \(\mathcal{X}\) and \(\mathcal{Y}\) with RKHSs \(\mathcal{H}_\mathcal{X}\) and \(\mathcal{H}_\mathcal{Y}\). The HSIC between $X$ and $Y$ is defined as the squared Hilbert-Schmidt norm of the associated cross-covariance operator $\Sigma_{YX}$:</p>
+
+\[\text{HSIC}(X, Y) := \|\Sigma_{YX}\|_{\text{HS}}^2\]
+
+<p>where \(\Sigma_{YX}: \mathcal{H}_\mathcal{X} \to \mathcal{H}_\mathcal{Y}\) is the cross-covariance operator.</p>
+
+<p><strong>Remark (Hilbert-Schmidt Norm and Singular Values).</strong> For a compact Hilbert-Schmidt operator \(C: \mathcal{H} \to \mathcal{G}\) with singular value decomposition \(C = \sum_{i=1}^\infty \sigma_i \langle \cdot, h_i \rangle_{\mathcal{H}} g_i\), where \(\{\sigma_i\}_{i=1}^\infty\) are the singular values and \((h_i)_{i \in I}\), \((g_i)_{i \in I}\) are orthonormal bases of \(\mathcal{H}\) and \(\mathcal{G}\) respectively, the Hilbert-Schmidt norm can equivalently be expressed as:</p>
+
+\[\|C\|_{\text{HS}}^2 = \sum_{i \in I} \|Ch_i\|_{\mathcal{G}}^2 = \sum_{i=1}^\infty \sigma_i^2(C)\]
+
+<p>The Hilbert-Schmidt norm aggregates information across all modes of the operator, capturing the total magnitude of the linear transformation. In the context of HSIC, the Hilbert-Schmidt norm measures the magnitude of the cross-covariance operator. When $X$ and $Y$ are independent, \(\Sigma_{YX} = 0\) and thus \(\text{HSIC}(X,Y) = 0\).</p>
+
+<p>Using \(\Sigma_{YX} = \mathbb{E}_{YX}[\phi(x) \otimes \psi(y)] - \mu_{\mathbb{P}_X} \otimes \mu_{\mathbb{P}_Y}\), we can expand the Hilbert-Schmidt norm using the definition of the cross-covariance operator, and obtain the kernel-based expression:</p>
+
+\[\begin{align*}
+\text{HSIC}(X,Y) = \|\Sigma_{YX}\|_{\text{HS}}^2 &amp;= \langle \:\mathbb{E}_{YX}[\phi(x) \otimes \psi(y)] - \mu_{\mathbb{P}_X} \otimes \mu_{\mathbb{P}_Y} \:, \: \mathbb{E}_{YX}[\phi(x) \otimes \psi(y)] - \mu_{\mathbb{P}_X} \otimes \mu_{\mathbb{P}_Y} \:\rangle \\
+&amp;= \mathbb{E}_{XY, X'Y'}\big[k_\mathcal{X}(X,X')k_\mathcal{Y}(Y,Y')\big]  + \mathbb{E}_{X,X'}\big[k_\mathcal{X}(X,X')\big] \mathbb{E}_{Y,Y'}\big[k_\mathcal{Y}(Y,Y')\big] \\
+&amp;\qquad - 2\mathbb{E}_{XY}\big[\mathbb{E}_{X'}\big[k_\mathcal{X}(X,X')\big] \mathbb{E}_{Y'}\big[k_\mathcal{Y}(Y,Y')\big]\big]
+\end{align*}\]
+
+<p>where the expectations are taken over independent copies $(X,Y)$ and $(X’,Y’)$. This expression involves only kernel evaluations and expectations, enabling empirical estimation without explicit feature map computations. This is another instance of the kernel trick, allowing us to work directly with kernel evaluations in potentially infinite-dimensional feature spaces.</p>
+
+<h4 id="222-empirical-estimation">2.2.2 Empirical Estimation</h4>
+
+<p>Given finite paired samples \(\{(x_i, y_i)\}_{i=1}^m\) drawn i.i.d. from \(\mathbb{P}_{XY}\), we estimate \(\text{HSIC}(X,Y)\) from data. Following the MMD framework, we can derive both biased and unbiased estimators based on the empirical cross-covariance operator.</p>
+
+<p><strong>Biased V-Statistic Estimator</strong></p>
+
+<p>The biased estimator is obtained by directly substituting the empirical cross-covariance operator into the Hilbert-Schmidt norm:</p>
+
+\[\widehat{\text{HSIC}}_v = \frac{1}{m^2} \text{tr}(\mathbf{K}_{XX} \mathbf{H} \mathbf{K}_{YY} \mathbf{H})\]
+
+<p>where \(\mathbf{K}_{XX} \in \mathbb{R}^{m \times m}\) and \(\mathbf{K}_{YY} \in \mathbb{R}^{m \times m}\) are the kernel Gram matrices, and \(\mathbf{H} = \mathbf{I} - \frac{1}{m}\mathbf{1}\mathbf{1}^\top\) is the centering matrix.</p>
+
+<p>Similarly to the Maximum Mean Discrepancy estimators, we can also define an unbiased U-statistic estimator of the Hilbert-Schmidt Independence Criterion.</p>
+
+<p><strong>Unbiased U-Statistic Estimator</strong></p>
+
+<p>An unbiased estimator of the HSIC is given by:</p>
+
+\[\widehat{\text{HSIC}}_u = \frac{1}{m(m-3)} \left[ \text{tr}(\bar{\mathbf{K}}_{XX} \bar{\mathbf{K}}_{YY}) + \frac{\mathbf{1}^\top \bar{\mathbf{K}}_{XX} \mathbf{1} \cdot \mathbf{1}^\top \bar{\mathbf{K}}_{YY} \mathbf{1}}{(m-1)(m-2)} - \frac{2}{m-2} \mathbf{1}^\top \bar{\mathbf{K}}_{XX} \bar{\mathbf{K}}_{YY} \mathbf{1} \right]\]
+
+<p>where \(\bar{\mathbf{K}}_{XX}\) and \(\bar{\mathbf{K}}_{YY}\) denote the Gram matrices \(\mathbf{K}_{XX}\) and \(\mathbf{K}_{YY}\), respectively, with diagonal entries set to 0. This estimator satisfies \(\mathbb{E}[\widehat{\text{HSIC}}_u] = \text{HSIC}(X,Y)\). The U-statistic is preferred in small-sample settings or when exact unbiasedness is required for hypothesis testing.</p>
+
+<h4 id="223-extensions-of-hsic">2.2.3 Extensions of HSIC</h4>
+
+<p>We can use a similar framework to test conditional independence, putting together the HSIC for cross-covariance and the normalized cross-covariance operators introduced in Definition 12. We can then define both the normalized HSIC and the normalized conditional HSIC, following the work and notation of K. Fukumizu, to which we refer the reader for more details, justifications and convergence proofs.</p>
+
+<p><strong>Definition (Conditional HSIC).</strong> The conditional HSIC and normalized HSIC are defined as:</p>
+
+\[\begin{align*}
+I^{COND}(X,Y|Z)  &amp;:= \|V_{YX|Z}\|_{\text{HS}}^2\\
+I^{NOCCO}(X,Y)  &amp;:= \|V_{YX}\|_{\text{HS}}^2
+\end{align*}\]
+
+<p>where \(V_{YX\|Z} = V_{YX} - V_{YZ}V_{XZ}\) is the normalized conditional cross-covariance operator, and $V_{YX}$ the normalized cross-covariance operator, as defined in section 1.3.2.</p>
+
+<p>For characteristic kernels, \(I^{COND}(X, Y \mid Z) = 0\) if and only if \(X \perp Y \mid Z\), and \(I^{NOCCO}(X,Y) = 0\) if and only if $X \perp Y$. These measures provide a complete characterization of conditional and unconditional independence, respectively.</p>
+
+<p><strong>Empirical Estimation</strong></p>
+
+<p>Given i.i.d. samples \(\{(x_i, y_i, z_i)\}_{i=1}^m\) from the joint distribution \(\mathbb{P}_{XYZ}\), we can construct empirical estimators of both measures. We first define the centered Gram matrices \(\mathbf{\tilde{K}}_{XX}, \mathbf{\tilde{K}}_{YY}, \mathbf{\tilde{K}}_{ZZ} \in \mathbb{R}^{m \times m}\) with entries</p>
+
+\[K_{XX,ij} = \langle k_\mathcal{X}(\cdot, x_i) - \hat{\mu}_{\mathbb{P}_X} \:, \: k_\mathcal{X}(\cdot, x_j) - \hat{\mu}_{\mathbb{P}_X}\rangle_{\mathcal{H}_\mathcal{X}}\]
+
+<p>and similarly for \(\mathbf{\tilde{K}}_{YY}\) and \(\mathbf{\tilde{K}}_{ZZ}\), where \(\hat{\mu}_{\mathbb{P}_X}\) are the empirical mean embeddings. To ensure numerical stability, we introduce regularized matrices through the regularization parameter $\epsilon_m &gt; 0$:</p>
+
+\[\mathbf{R}_X = \mathbf{\tilde{K}}_{XX}(\mathbf{\tilde{K}}_{XX} + m\epsilon_m \mathbf{I})^{-1}, \quad \mathbf{R}_{Y} = \mathbf{\tilde{K}}_{YY}(\mathbf{\tilde{K}}_{YY} + m\epsilon_m \mathbf{I})^{-1}, \quad \mathbf{R}_{Z} = \mathbf{\tilde{K}}_{ZZ}(\mathbf{\tilde{K}}_{ZZ} + m\epsilon_m \mathbf{I})^{-1}\]
+
+<p>The empirical normalized HSIC is then computed as:</p>
+
+\[\widehat{I}^{NOCCO}_m(X,Y) = \text{tr}(\mathbf{R}_Y \mathbf{R}_X)\]
+
+<p>For conditional HSIC, using the empirical normalized conditional cross-covariance operator, the estimator is:</p>
+
+\[\widehat{I}^{COND}_m(X,Y|Z) = \text{tr}(\mathbf{R}_Y \mathbf{R}_X - 2\mathbf{R}_Y \mathbf{R}_X \mathbf{R}_Z + \mathbf{R}_Y \mathbf{R}_Z \mathbf{R}_X \mathbf{R}_Z)\]
+
+<h3 id="23-kernel-stein-discrepancy-ksd">2.3 Kernel Stein Discrepancy (KSD)</h3>
+
+<p>Stein’s method was introduced by James-Stein in the 1970s, but the subsequent developments and applications of his method to non-linear feature maps and more modern statistical learning and hypothesis testing have resurfaced in the 2010s. For this section, we refer mostly to Chwialkowski et al. (2016), Gorham &amp; Mackey (2015), and Liu et al. (2016) for additional details and proofs on the methods introduced.</p>
+
+<h4 id="231-steins-method">2.3.1 Stein’s Method</h4>
+
+<p>Stein’s method provides an elegant solution for testing whether samples are drawn from a target distribution, in the case where the target is only known up to a normalizing constant, which might be intractable to compute. Classical goodness-of-fit tests, such as Kolmogorov-Smirnov or likelihood-based methods required access to the normalized target density. Maximum Mean Discrepancy requires samples from both distributions, which we may not have for the target.</p>
+
+<p>Stein’s method relies on an identity that eliminates the dependence on the normalizing constant. We first introduce the <em>Stein Operator</em>.</p>
+
+<p><strong>Definition (Stein Operator).</strong> For a smooth probability density $p$ on \(\mathbb{R}^d\), the Stein operator $\mathcal{T}_p$ is the linear operator acting on smooth vector-valued test functions \(f : \mathbb{R}^d \to \mathbb{R}^d\) defined by:</p>
+
+\[\mathcal{T}_p f(x) := \nabla_x \log p(x) \cdot f(x) + \nabla_x \cdot f(x),\]
+
+<p>where \(\nabla_x \log p(x) \cdot f(x) = \sum_{i=1}^d \frac{\partial \log p}{\partial x_i} f_i(x)\) denotes the Euclidean inner product, and $\nabla_x \cdot f(x) = \sum_{i=1}^d \frac{\partial f_i}{\partial x_i}$ is the divergence of $f$.</p>
+
+<p>The crucial property of this operator is that the score function $\nabla_x \log p(x)$ depends only on the unnormalized density. This operator is particularly useful because it depends on $p$ only through the <em>score function</em> \(\nabla_x \log p(x)\). If \(p(x) = \tilde{p}(x)/Z\) where $Z$ is an intractable normalizing constant, then:</p>
+
+\[\nabla_x \log p(x) = \nabla_x \log \frac{\tilde{p}(x)}{Z} = \nabla_x \log \tilde{p}(x) - \nabla_x \log Z = \nabla_x \log \tilde{p}(x)\]
+
+<p>since $Z$ is a constant. Thus, the identity can be evaluated without knowledge of the normalizing constant. We now define Stein’s identity:</p>
+
+<p><strong>Theorem (Stein’s Identity).</strong> Let $p$ be a smooth probability density on \(\mathbb{R}^d\) with \(\nabla_x p(x) \to 0\) as \(\|x\| \to \infty\). For any smooth vector-valued function \(f : \mathbb{R}^d \to \mathbb{R}^d\) that decays sufficiently fast at infinity,</p>
+
+\[\mathbb{E}_{x \sim p}\left[ \mathcal{T}_p f(x) \right] = 0\]
+
+<p><em>Proof sketch (1d case).</em></p>
+
+\[\begin{align*}
+\mathbb{E}_{x \sim p}\left[\frac{p'(x)}{p(x)} f(x) + f'(x)\right] &amp;= \int_{-\infty}^{\infty} \left[p'(x) f(x) + p(x) f'(x)\right] dx \\
+&amp;= \int_{-\infty}^{\infty} \frac{d}{dx}[p(x) f(x)] dx \\
+&amp;= [p(x) f(x)]_{-\infty}^{\infty} = 0
+\end{align*}\]
+
+<p>where the last equality follows from the boundary conditions $p(x) \to 0$ as $x \to \pm\infty$. The multivariate case follows by applying this argument component-wise. $\square$</p>
+
+<p>Stein’s identity provides a principled approach to test discrepancies without requiring a normalizing constant nor samples from the target distribution. If samples are drawn from $p$, then \(\mathbb{E}_{x \sim p}[\mathcal{T}_p f(x)] = 0\) for all suitable $f$. Conversely, given samples \(\{x_i\}_{i=1}^n\) from an unknown distribution $q$, we can evaluate \(\mathbb{E}_{x \sim q}[\mathcal{T}_p f(x)]\), which we expect to be $0$ in the case where $q = p$. The magnitude of the Stein discrepancy \(\mathbb{E}_{x \sim q}[\mathcal{T}_p f(x)]\) should provide evidence against the hypothesis that $q = p$. This raises the question of the class of functions one should consider for $f$. We’ll see in the next section that we can apply a procedure similar to the framework of the Maximum Mean Discrepancy statistic in section 2.1.1, using a kernel-based approach by considering all functions in the unit ball of a RKHS.</p>
+
+<h4 id="232-ksd">2.3.2 KSD</h4>
+
+<p>Following the framework of the Maximum Mean Discrepancy, we adopt a kernel-based approach by considering all functions in the unit ball of a reproducing kernel Hilbert space.</p>
+
+<p>Let \(\mathcal{H}^d = \mathcal{H} \times \cdots \times \mathcal{H}\) be the product RKHS of vector-valued functions \(f: \mathbb{R}^d \to \mathbb{R}^d\), where \(\mathcal{H}\) is an RKHS with kernel \(k: \mathbb{R}^d \times \mathbb{R}^d \to \mathbb{R}\).</p>
+
+<p>Using the derivative reproducing property (Proposition 3) on the product space $\mathcal{H}^d$, note that:</p>
+
+\[\nabla^\top f(x) = \langle f, \nabla k(x, \cdot)\rangle_{\mathcal{H}^d} \qquad \text{and} \qquad f(x)^\top \nabla \log p(x) = \langle f, \nabla \log p(x) k(x, \cdot )\rangle_{\mathcal{H}^d} \qquad \forall f\in \mathcal{H}^d, x\in \mathbb{R}^d\]
+
+<p>We can now express the Stein operator as an inner product within $\mathcal{H}^d$ using once more the reproducing property:</p>
+
+\[\mathcal{T}_p f(x) = \nabla_x \log p(x) \cdot f(x) + \nabla_x \cdot f(x) = \langle f, \nabla \log p(x) k(x, \cdot ) +\nabla k(x, \cdot)\rangle_{\mathcal{H}^d}\]
+
+<p>And following the notation of Chwialkowski et al. (2016), writing \(\xi_p (x, \cdot) := \nabla \log p(x) k(x, \cdot ) +\nabla k(x, \cdot)\), we can now define the expected Stein operator for samples from a distribution $q$ as an inner product in the RKHS:</p>
+
+\[\mathbb{E}_{x \sim q}\left[ \mathcal{T}_p f(x) \right] = \mathbb{E}_{x \sim q}\left[\langle f, \xi_p (x, \cdot) \rangle \right] = \langle f, \mathbb{E}_{x \sim q}\left[\xi_p (x, \cdot)\right] \rangle\]
+
+<p>We finally define the <em>Kernelized Stein Discrepancy</em> as the supremum of the expected Stein operator over the class of all functions in the unit ball of the RKHS $\mathcal{H}^d$.</p>
+
+<p><strong>Definition (Kernelized Stein Discrepancy).</strong> For a distribution $q$ on $\mathbb{R}^d$ and a target distribution $p$, the Kernelized Stein Discrepancy is defined as:</p>
+
+\[\text{KSD}(q, p) := \sup_{\substack{f \in \mathcal{H}^d \\ \|f\|_{\mathcal{H}^d} \leq 1}} \mathbb{E}_{x \sim q}[\mathcal{T}_p f(x)] = \sup_{\substack{f \in \mathcal{H}^d \\ \|f\|_{\mathcal{H}^d} \leq 1}} \langle f, \mathbb{E}_{x \sim q}\left[\xi_p (x, \cdot)\right] \rangle  = \| \mathbb{E}_{x \sim q}\left[\xi_p (x, \cdot) \right]\|_{\mathcal{H}^d}\]
+
+<p>using Cauchy-Schwarz, similarly as for the derivation of the closed-form of the Maximum Mean Discrepancy in section 2.1.1.</p>
+
+<p>We can now express the squared KSD as:</p>
+
+\[\text{KSD}^2(q, p) = \| \mathbb{E}_{x \sim q}\left[\xi_p (x, \cdot) \right]\|_{\mathcal{H}^d}^2 = \mathbb{E}_{x \sim q, x' \sim q}\left[ h_P(x, x') \right]\]
+
+<p>where $h_P$ is the <em>Stein Kernel</em>, defined as:</p>
+
+\[\begin{align*}
+h_P(x, x') &amp;:= \nabla \log p(x)^\top\nabla \log p(x') k(x, x') \\
+&amp;\quad+ \nabla \log p(x')^\top\nabla_x k(x, x') \\
+&amp;\quad+ \nabla \log p(x)^\top\nabla_{x'} k(x, x') \\
+&amp;\quad+ \langle \nabla_x k(x, \cdot), \nabla_{x'} k(\cdot, x')\rangle_{\mathcal{H}^d}
+\end{align*}\]
+
+<p>Once again, this enables us to use the “kernel trick” in order to evaluate the (squared) Kernel Stein Discrepancy using only kernel evaluations and the score function $\nabla_x \log p(x)$ of the unnormalized target density.</p>
+
+<h4 id="233-empirical-estimation">2.3.3 Empirical Estimation</h4>
+
+<p>Similarly to the Maximum Mean Discrepancy and Hilbert-Schmidt Independence Criterion chapters, we now focus on the empirical estimation of the Kernel Stein Discrepancy statistic from data samples. Given finite samples ${x_1, \ldots, x_m}$ drawn i.i.d. from an unknown distribution $q$, we can estimate $\text{KSD}^2(q, p)$ from data using empirical averages of the Stein kernel.</p>
+
+<p><strong>Biased V-Statistic Estimator</strong></p>
+
+<p>The V-statistic estimator is obtained by directly substituting the empirical distribution into the population formula:</p>
+
+\[\widehat{\text{KSD}}_v^2 = \frac{1}{m^2}\sum_{i,j=1}^m h_P(x_i, x_j)\]
+
+<p>This estimator is the empirical analog of \(\text{KSD}^2(q, p) = \mathbb{E}_{x, x' \sim q}[h_P(x, x')]\). The V-statistic includes diagonal terms $h(x_i, x_i)$ and is therefore biased for finite samples. Setting $\mathbf{H}_{XX}$ as the kernel Gram matrix of the Stein kernel $h_P$, we can also express it in matrix form:</p>
+
+\[\widehat{\text{KSD}}_v^2 = \frac{1}{m^2} \mathbf{1}^\top \mathbf{H}_{XX}\mathbf{1}\]
+
+<p><strong>Unbiased U-Statistic Estimator</strong></p>
+
+<p>To obtain an unbiased estimator, we exclude the diagonal terms, denoting by \(\mathbf{\tilde{H}}_{XX}\) the Stein Kernel Gram matrix \(\mathbf{H}_{XX}\) with its diagonal elements set to 0:</p>
+
+\[\widehat{\text{KSD}}_u^2 = \frac{1}{m(m-1)}\sum_{\substack{i,j=1 \\ i\neq j}}^m h_P(x_i, x_j) \qquad \text{and its matrix form} \quad \widehat{\text{KSD}}_u^2 = \frac{1}{m(m-1)} \mathbf{1}^\top \mathbf{\tilde{H}}_{XX}\mathbf{1}\]
+
+<p>This estimator satisfies $\mathbb{E}[\widehat{\text{KSD}}_u^2] = \text{KSD}^2(q, p)$. Similarly to the MMD and HSIC U-statistics, this estimator is preferred when exact unbiasedness is required, such as in small-sample settings.</p>
+
+<p>To test the null hypothesis $H_0: q = p$ versus $H_1: q \neq p$, we compare the empirical KSD against a threshold, generally defined as a quantile of its distribution over the null-hypothesis, obtained via the Wild Bootstrap method.</p>
+
+<hr />
+<h2 id="references">References</h2>
+
+<p><strong>Theory of Reproducing Kernels</strong> (1950)<br />
+Nachman Aronszajn<br />
+<a href="https://www.ams.org/journals/tran/1950-068-03/S0002-9947-1950-0051437-7/S0002-9947-1950-0051437-7.pdf" target="_blank">Paper</a></p>
+
+<p><strong>Reproducing Kernel Hilbert Spaces in Probability and Statistics</strong> (2011)<br />
+Alain Berlinet, Christine Thomas-Agnan<br />
+<a href="https://link.springer.com/book/10.1007/978-1-4419-9096-9" target="_blank">Book</a></p>
+
+<p><strong>A Kernel Test of Goodness of Fit</strong> (2016)<br />
+Kacper Chwialkowski, Heiko Strathmann, Arthur Gretton<br />
+<a href="https://arxiv.org/abs/1602.02964" target="_blank">Paper</a></p>
+
+<p><strong>Dimensionality Reduction for Supervised Learning with Reproducing Kernel Hilbert Spaces</strong> (2004)<br />
+Kenji Fukumizu, Francis R. Bach, Michael I. Jordan<br />
+<a href="https://www.jmlr.org/papers/v5/fukumizu04a.html" target="_blank">Paper</a></p>
+
+<p><strong>Kernel Measures of Conditional Dependence</strong> (2007)<br />
+Kenji Fukumizu, Arthur Gretton, Xiaohai Sun, Bernhard Schölkopf<br />
+<a href="https://papers.nips.cc/paper_files/paper/2007/file/3a0772443a0739141292a5429b952fe6-Paper.pdf" target="_blank">Paper</a></p>
+
+<p><strong>Kernel Dimension Reduction in Regression</strong> (2009)<br />
+Kenji Fukumizu, Francis R. Bach, Michael I. Jordan<br />
+<a href="https://doi.org/10.1214/08-AOS637" target="_blank">Paper</a></p>
+
+<p><strong>Measuring Sample Quality with Stein’s Method</strong> (2015)<br />
+Jackson Gorham, Lester Mackey<br />
+<a href="https://arxiv.org/abs/1506.03039" target="_blank">Paper</a></p>
+
+<p><strong>A Kernel Method for the Two-Sample Problem</strong> (2007)<br />
+Arthur Gretton, Karsten M. Borgwardt, Malte Rasch, Bernhard Schölkopf, Alexander Smola<br />
+<a href="https://arxiv.org/abs/0805.2368" target="_blank">Paper</a></p>
+
+<p><strong>Measuring Statistical Dependence with Hilbert-Schmidt Norms</strong> (2005)<br />
+Arthur Gretton, Olivier Bousquet, Alex Smola, Bernhard Schölkopf<br />
+<a href="https://link.springer.com/chapter/10.1007/11564089_7" target="_blank">Paper</a></p>
+
+<p><strong>A Kernel Two-Sample Test</strong> (2012)<br />
+Arthur Gretton, Karsten M. Borgwardt, Malte J. Rasch, Bernhard Schölkopf, Alexander Smola<br />
+<a href="https://www.jmlr.org/papers/v13/gretton12a.html" target="_blank">Paper</a></p>
+
+<p><strong>A Kernelized Stein Discrepancy for Goodness-of-fit Tests</strong> (2016)<br />
+Qiang Liu, Jason Lee, Michael Jordan<br />
+<a href="https://arxiv.org/abs/1602.03253" target="_blank">Paper</a></p>
+
+<p><strong>Methods of Modern Mathematical Physics I: Functional Analysis</strong> (1980)<br />
+Michael Reed, Barry Simon<br />
+<a href="https://www.astrosen.unam.mx/~aceves/Metodos/ebooks/reed_simon1.pdf" target="_blank">Book</a></p>
+
+<p><strong>Learning with Kernels</strong> (1998)<br />
+Alexander J. Smola, Bernhard Schölkopf<br />
+<a href="https://mcube.lab.nycu.edu.tw/~cfung/docs/books/scholkopf2002learning_with_kernels.pdf" target="_blank">Book</a></p>
+
+<p><strong>A Hilbert Space Embedding for Distributions</strong> (2007)<br />
+Alex Smola, Arthur Gretton, Le Song, Bernhard Schölkopf<br />
+<a href="https://link.springer.com/chapter/10.1007/978-3-540-75225-7_5" target="_blank">Paper</a></p>
+
+<p><strong>Supervised Feature Selection via Dependence Estimation</strong> (2007)<br />
+Le Song, Alex Smola, Arthur Gretton, Karsten M. Borgwardt, Justin Bedo<br />
+<a href="https://dl.acm.org/doi/10.1145/1273496.1273600" target="_blank">Paper</a></p>
+
+<p><strong>Hilbert Space Embeddings and Metrics on Probability Measures</strong> (2010)<br />
+Bharath K. Sriperumbudur, Arthur Gretton, Kenji Fukumizu, Bernhard Schölkopf, Gert R. G. Lanckriet<br />
+<a href="https://www.jmlr.org/papers/v11/sriperumbudur10a.html" target="_blank">Paper</a></p>
+
+<p><strong>A Bound for the Error in the Normal Approximation to the Distribution of a Sum of Dependent Random Variables</strong> (1972)<br />
+Charles Stein<br />
+<a href="https://projecteuclid.org/euclid.bsmsp/1200514239" target="_blank">Paper</a></p>
+
+<p><strong>Support Vector Machines</strong> (2008)<br />
+Ingo Steinwart, Andreas Christmann<br />
+<a href="https://link.springer.com/book/10.1007/978-0-387-77242-4" target="_blank">Book</a></p>
+
+<p><strong>Derivative Reproducing Properties for Kernel Methods in Learning Theory</strong> (2008)<br />
+Ding-Xuan Zhou<br />
+<a href="https://www.sciencedirect.com/science/article/pii/S0377042707004657" target="_blank">Paper</a></p>
+
+  </div>
+</div>
+
+
+    </div>
+  </div>
+
+  <script>
+    const toggle = document.getElementById('theme-toggle');
+    const body = document.body;
+    
+    // Check for saved theme preference or default to light
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    body.classList.add(currentTheme + '-theme');
+    
+    toggle.addEventListener('click', () => {
+      if (body.classList.contains('light-theme')) {
+        body.classList.remove('light-theme');
+        body.classList.add('dark-theme');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        body.classList.remove('dark-theme');
+        body.classList.add('light-theme');
+        localStorage.setItem('theme', 'light');
+      }
+      
+      // Toggle images
+      document.querySelectorAll('img[data-light-src]').forEach(img => {
+        if (body.classList.contains('dark-theme')) {
+          img.src = img.getAttribute('data-dark-src');
+        } else {
+          img.src = img.getAttribute('data-light-src');
+        }
+      });
+    });
+    
+    // Set correct images on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('img[data-light-src]').forEach(img => {
+        if (body.classList.contains('dark-theme')) {
+          img.src = img.getAttribute('data-dark-src');
+        } else {
+          img.src = img.getAttribute('data-light-src');
+        }
+      });
+    });
+  </script>
+<a href="/misc/" style="
+  font-size:5px;
+  opacity:0.15;
+  position:fixed;
+  bottom:6px;
+  right:6px;
+  z-index:9999;
+">·</a>
+
+</body>
+</html>
+

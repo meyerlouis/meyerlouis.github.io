@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blog | Louis Meyer</title>
+<meta name="description" content="This is my online attic">
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\\[','\\]']],
+      processEscapes: true
+    },
+    TeX: {
+      equationNumbers: { autoNumber: "AMS" }
+    },
+    CommonHTML: {
+      linebreaks: { automatic: true, width: "container" }
+    },
+    "HTML-CSS": {
+      linebreaks: { automatic: true, width: "container" },
+      availableFonts: [],
+      preferredFont: null,
+      webFont: "TeX"
+    },
+    SVG: {
+      linebreaks: { automatic: true, width: "container" }
+    }
+  });
+</script>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<!-- Highlight.js -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-light.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+
+</head>
+<body>
+  <div id="wrapper">
+    <div id="name">
+      <a href="/">Louis Meyer</a>
+    </div>
+
+    <div id="nav">
+  <ul>
+    <li><a href="/about">About</a></li>
+    <li><a href="/blog">Blog</a></li>
+    <li><a href="/publications">Publications</a></li>
+    <li><a href="mailto:louismeyer.lcm@gmail.com">louismeyer.lcm@gmail.com</a></li>
+    <li><a href="mailto:louis.meyer@warwick.ac.uk">louis.meyer@warwick.ac.uk</a></li>
+
+    <!-- push this to the right -->
+    <li class="theme-toggle-wrapper">
+      <button id="theme-toggle" aria-label="Toggle dark mode">◐</button>
+    </li>
+  </ul>
+</div>
+
+
+    <div id="content">
+      <p>Here are some <a href="/misc/" style="color:inherit; text-decoration:none;">articles I wrote</a>. I wrote them for myself, as I find these subjects interesting. They also tend to come up in interviews for ML / quant positions, so now I can access my notes online from my phone, while waiting for my interviews at the onsites.</p>
+
+<p>Feel free to send me an email if you believe I made a mistake or have omitted any important details.</p>
+
+<p>These notes are made to be easily readable. It assumes that the reader is familiar with the basic subjects as I rarely explain the terminology or the motivation. I try to make these posts as practical as possible and as information-dense as possible, while introducing concepts intuitively.</p>
+
+<p>Most of the content is generally coming directly from (no more than) a handful of sources, which I do not hesitate to paraphrase from if I like the wording. Even though this is the case, I try to bring a new flavour, add explanations or proofs to the concepts I explore.</p>
+
+<hr class="post-divider" />
+
+<div id="posts">
+  
+    
+    <div class="post-row">
+      <div class="post-title">
+        <a href="/blog/Kernel/">Dependency and Discrepancy Measures in RKHS</a>
+      </div>
+      
+      <div class="post-subtitle">The joy of reproducing kernel Hilbert spaces</div>
+      
+      <!-- <div class="meta">January 06, 2000</div> -->
+    </div>
+    
+  
+    
+  
+    
+    <div class="post-row">
+      <div class="post-title">
+        <a href="/blog/Clustering/">Clustering</a>
+      </div>
+      
+      <div class="post-subtitle">K-means and Hierarchical Clustering. Distance functions, linkage criterias and model assessment. Also  Mixture Models and the EM Algorithm.</div>
+      
+      <!-- <div class="meta">January 04, 2000</div> -->
+    </div>
+    
+  
+    
+    <div class="post-row">
+      <div class="post-title">
+        <a href="/blog/Sharpe/">The Sharpe Ratio</a>
+      </div>
+      
+      <div class="post-subtitle">Pain and Gain. Not for crypto traders, they seem to only get one at the time.</div>
+      
+      <!-- <div class="meta">January 03, 2000</div> -->
+    </div>
+    
+  
+    
+    <div class="post-row">
+      <div class="post-title">
+        <a href="/blog/Shrinkage/">Regularization in Regression</a>
+      </div>
+      
+      <div class="post-subtitle">Ridge, Lasso and Elastic-Net: the 3 musketeers. (I actually only use bi-directional LSTMs)</div>
+      
+      <!-- <div class="meta">January 02, 2000</div> -->
+    </div>
+    
+  
+    
+    <div class="post-row">
+      <div class="post-title">
+        <a href="/blog/OLS/">Ordinary Least Squares</a>
+      </div>
+      
+      <div class="post-subtitle">A (not so?) gentle introduction to OLS</div>
+      
+      <!-- <div class="meta">January 01, 2000</div> -->
+    </div>
+    
+  
+</div>
+
+    </div>
+  </div>
+
+  <script>
+    const toggle = document.getElementById('theme-toggle');
+    const body = document.body;
+    
+    // Check for saved theme preference or default to light
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    body.classList.add(currentTheme + '-theme');
+    
+    toggle.addEventListener('click', () => {
+      if (body.classList.contains('light-theme')) {
+        body.classList.remove('light-theme');
+        body.classList.add('dark-theme');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        body.classList.remove('dark-theme');
+        body.classList.add('light-theme');
+        localStorage.setItem('theme', 'light');
+      }
+      
+      // Toggle images
+      document.querySelectorAll('img[data-light-src]').forEach(img => {
+        if (body.classList.contains('dark-theme')) {
+          img.src = img.getAttribute('data-dark-src');
+        } else {
+          img.src = img.getAttribute('data-light-src');
+        }
+      });
+    });
+    
+    // Set correct images on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('img[data-light-src]').forEach(img => {
+        if (body.classList.contains('dark-theme')) {
+          img.src = img.getAttribute('data-dark-src');
+        } else {
+          img.src = img.getAttribute('data-light-src');
+        }
+      });
+    });
+  </script>
+<a href="/misc/" style="
+  font-size:5px;
+  opacity:0.15;
+  position:fixed;
+  bottom:6px;
+  right:6px;
+  z-index:9999;
+">·</a>
+
+</body>
+</html>
+

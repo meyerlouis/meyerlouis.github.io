@@ -8,7 +8,7 @@ title: Publications
 <h3>PrePrints</h3>
 
 <div class="pub-item">
-  <div class="pub-title">A Kernel Nonconformity Score for Multivariate Conformal Prediction</div>
+  <div class="pub-title"><strong>A Kernel Nonconformity Score for Multivariate Conformal Prediction</strong></div>
   <div class="pub-authors">Louis Meyer, Wenkai Xu</div>
   <div class="pub-venue">arXiv, 2026</div>
   <div><a href="https://arxiv.org/abs/2604.21595">PDF</a></div>

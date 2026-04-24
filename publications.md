@@ -5,9 +5,14 @@ title: Publications
 
 <h2>Publications</h2>
 
-### :(
+<h3>PrePrints</h3>
 
-Will have some soon, I promise. Trust.
+<div class="pub-item">
+  <div class="pub-title">A Kernel Nonconformity Score for Multivariate Conformal Prediction</div>
+  <div class="pub-authors">Louis Meyer, Wenkai Xu</div>
+  <div class="pub-venue">arXiv, 2026</div>
+  <div><a href="https://arxiv.org/abs/2604.21595">PDF</a></div>
+</div>
 
 
 <!-- <div class="pub-item">

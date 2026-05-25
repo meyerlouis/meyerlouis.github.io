@@ -75,7 +75,7 @@ BubbleSort is arguably the simplest algorithm.
     for i in range(n):
 
         # The last i elements should already be in place
-        for j in range(i, n-1-i):
+        for j in range(0, n-1-i):
 
             # Swap the elements if the first is larger
             if array[i]>array[j]:
@@ -276,4 +276,3 @@ Gayle Laakmann McDowell\
 
 **GeeksforGeeks**\
 [Website](https://www.geeksforgeeks.org/dsa/sorting-algorithms/){:target="_blank"}
-

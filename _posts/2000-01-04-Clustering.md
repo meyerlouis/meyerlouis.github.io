@@ -1,93 +1,89 @@
 ---
 layout: post
 title: "Clustering"
-subtitle: "K-means and Hierarchical Clustering. Distance functions, linkage criterias and model assessment. Also  Mixture Models and the EM Algorithm."
+subtitle: "K-means and Hierarchical Clustering. Distance functions, linkage criteria and model assessment. Also Mixture Models and the EM Algorithm."
 ---
 
 ## K-means
 
-Given a set of $n$ observations, *k-means clustering* aims to partition the $n$ observations into $k\leq n$ sets, to minimize the *within-cluster sum of squares* (i.e. variance). The objective is:
+Given $n$ observations, k-means partitions them into $k \leq n$ sets $S_1, \dots, S_k$ minimizing the *within-cluster sum of squares*,
 
-$$
-\text{argmin}_{S} \sum_{i=1}^k \sum_{x\in S_i} \| x - \mu_i\|^2 = \text{argmin}_{S} \sum_{i=1}^k |S_i| \text{Var}(S_i)
-$$
+$$\arg\min_S\ \sum_{i=1}^k\sum_{x \in S_i}\|x - \mu_i\|^2 = \arg\min_S\ \sum_{i=1}^k |S_i|\,\operatorname{Var}(S_i) \qquad \mu_i = \frac{1}{|S_i|}\sum_{x \in S_i}x$$
 
-$$\text{where} \quad  \mu_i = \frac{1}{|S_i|} \sum_{x \in S_i}x \quad \small{\text{is the centroid of points in }} S_i
-$$
+with $\mu_i$ the centroid of $S_i$. The second form says the objective is the sum of cluster variances weighted by cluster size.
 
+**Lloyd's algorithm:** alternate assignment and update until nothing moves.
 
-### Lloyd's algorithm :
-> - Initialize: Pick K centroids $m_1, m_2, \dots, m_k$
-> - Repeat until convergence:
->   - ***Asssignment step***: Assign each observation to the cluster with the nearest mean (centroid)
-        $$S_i = \big\{ x_p: \| x_p - m_i\|^2 \leq \| x_p - m_j\|^2 \quad \forall j, 1\leq j\leq k \big\}$$
->   - ***Update step***: Recalculate means (centroids) for observations assigned to each cluster
-        $$m_i = \frac{1}{|S_i|} \sum_{x_j \in S_i} x_j$$
-    
+1. Initialize $k$ centroids $m_1, \dots, m_k$.
+2. ***Assignment step***: attach each point to the nearest centroid,
 
-Lloyd's algorithm has guaranteed finite convergence to *local* minimum, as the loss $J$ (see below) decreases monotonically, is bounded below by $0$ and the partition space is finite (at most $K^n$ possible assignments).
+$$S_i = \big\{x_p:\ \|x_p - m_i\|^2 \leq \|x_p - m_j\|^2 \ \ \forall j\big\}$$
 
+3. ***Update step***: recompute each centroid as the mean of its cluster,
 
-**Mean is the Optimal Centroid**
+$$m_i = \frac{1}{|S_i|}\sum_{x_j \in S_i}x_j$$
 
-$$\textit{Proof:}$$
-Let $J =  \sum_{i=1}^k \sum_{x\in S_i} \| x - \mu_i\|^2$\
-Take derivative: 
+Both steps weakly decrease the objective $J$, which is bounded below by zero, and the partition space is finite (at most $k^n$ assignments), so the algorithm converges in finitely many steps. It converges to a *local* minimum, not the global one.
 
-$$\frac{\partial J}{\partial \mu_i} 
-        = \frac{\partial}{\partial \mu_i} \Big[ \sum_{x\in S_i} (x_i - \mu_i)^\top(x_i - \mu_i)\Big]
-        = -2 \sum_{x\in S_i} (x_i - \mu_i)$$
+**The mean is the optimal centroid:** the update step is not a heuristic, it is the exact minimizer given the assignment.
 
-Set to 0:
+*Proof:* With $J = \sum_{i=1}^k\sum_{x \in S_i}\|x - \mu_i\|^2$,
 
-$$\sum_{x\in S_i} (x_i - \mu_i)
-        = 0 \iff \sum_{x\in S_i} x_i = |S_i|\mu_i \iff \mu_i = \frac{1}{|S_i|}\sum_{x\in S_i} x_i $$
+$$\frac{\partial J}{\partial\mu_i} = \frac{\partial}{\partial\mu_i}\Big[\sum_{x \in S_i}(x - \mu_i)^\top(x - \mu_i)\Big] = -2\sum_{x \in S_i}(x - \mu_i)$$
 
+and setting this to zero,
 
-**Initialization methods**
-- Random Partition: assign each point randomly to a cluster, compute means
-- Forgy Method: pick K random points as initial centroids
+$$\sum_{x \in S_i}(x - \mu_i) = 0 \iff \sum_{x \in S_i}x = |S_i|\,\mu_i \iff \mu_i = \frac{1}{|S_i|}\sum_{x \in S_i}x$$
 
-- ***K-means++***: spreads out the initial cluster centers. Cluster centers are sampled sequentially and each new cluster is chosen from the remaining data points with probability proportional to its square distance from the closest existing cluster center.
-> - $m_1 \sim \mathrm{Uniform}(\{x_1, x_2, \dots, x_n\})$
-> - for $t = 2, \dots, k$:
->     - for each point $x_i$:
->         - $d(x_i) = \min_{j < t} \|x_i - m_j\|^2$
->     - $P(x_i \text{ selected}) = \frac{d(x_i)}{\sum_j d(x_j)}$
-- Farthest Point: deterministic, always pick farthest point from current centroids
+**Initialization:** the objective is non-convex, so the starting point matters.
 
+1. *Random partition*: assign each point to a random cluster, then compute means.
+2. *Forgy*: pick $k$ random data points as the initial centroids.
+3. *Farthest point*: deterministic, repeatedly take the point farthest from the current centroids.
+4. ***K-means++***: sample centers sequentially, each new center drawn from the remaining points with probability proportional to its squared distance to the nearest existing center,
 
-**Variants**
-- *K-medians*: minimize $\sum_{i=1}^k \sum_{x\in S_i} \| x - \mu_i\|$. More robust to outliers
-- *K-medoids*: has the constraint that $\mu_k$ must be an actual data point
-- *Fuzzy C-means*: soft clustering approach, minimize $\sum_{i=1}^k \sum_{j} w_{ji}^m \|\| x_j - \mu_i\|\|^2$ where each element $w_{ji}$ tells the degree to which element $x_j$ belongs to cluster $S_i$. $w_{ji} = \Big[\sum_{i=1}^k\big(\frac{ \| x_j - \mu_i\|}{\| x_j - \mu_k\|} \big)^{\frac{2}{m-1}}\big]^{-1} $
-- *Kernel K-means*: Operate in implicit feature space $\psi(x)$
-- *Spherical K-means*: use cosine similarity instead of euclidean. Normalize updates $\mu_k = (\Sigma x_i) / \| \Sigma x_i \|$
+$$m_1 \sim \mathrm{Uniform}\{x_1, \dots, x_n\} \qquad d(x_i) = \min_{j < t}\|x_i - m_j\|^2 \qquad \mathbb{P}(x_i\ \text{chosen}) = \frac{d(x_i)}{\sum_j d(x_j)}$$
 
+This spreads the initial centers out and comes with a guarantee: the expected objective is within $O(\log k)$ of the optimum, before Lloyd's iterations even begin.
 
-**Computational upgrades**
-- *Vectorization*: $\|x_i - \mu_k\|^2 = x_i^\top x_i - 2x_i^\top\mu_k + \mu_k^\top\mu_k$ which can be computed as matrix operations. So we can compute all pairwise squared distances efficiently and don't need to loop over: observations, clusters, dimensions.
-- *Mini-Batch K-means*: $\mu_k^{new} =\mu_k + \frac{b}{v_k + b} \big( \frac{1}{b} \sum_{i=1}^b x_i - \mu_k\big)$ if we've seen $v_k$ points in cluster $k$ so far and we assign $b$ new points to that cluster.
+**Variants:**
 
+1. *K-medians* minimizes $\sum_i\sum_{x \in S_i}\|x - \mu_i\|$, using the $L_1$ norm, so the center becomes the coordinatewise median and the method is more robust to outliers.
+2. *K-medoids* constrains each center to be an actual data point, which allows arbitrary distance matrices.
+3. *Fuzzy C-means* is the soft version, minimizing $\sum_{i=1}^k\sum_j w_{ji}^m\|x_j - \mu_i\|^2$ with membership degrees
 
-**Problems with K-Means**
-- Cluster of similar expected size. This is the assumption of spherical cluster that are separable so that the mean converges towards the geometric cluster center. So K-means works poorly on elongated and concentric clusters and clusters of different density. 
-- Can only find convex clusters.
-- Sensitive to initialization. Different starting points can yield very different final clusters. So can converge to a local minimum. 
-- Sensitive to scale. Requires careful normalization/standardization otherwise features with large variance dominate the distance calculation.
-- Assumes equal importance to each feature.
-- Sensitive to outliers and noise.
-- Computationally expensive: $O(n\times k\times d \times iterations)$.
-- Curse of dimensionality: all pairwise distance becomes similar (concentration phenomenon).
+$$w_{ji} = \Bigg[\sum_{l=1}^k\bigg(\frac{\|x_j - \mu_i\|}{\|x_j - \mu_l\|}\bigg)^{\frac{2}{m-1}}\Bigg]^{-1}$$
 
+4. *Kernel K-means* operates in an implicit feature space $\psi(x)$, allowing non-convex clusters.
+5. *Spherical K-means* uses cosine similarity, normalizing the updates by $\mu_k = \big(\sum x_i\big)/\|\sum x_i\|$.
+
+**Computation:** the distance computation vectorizes through
+
+$$\|x_i - \mu_k\|^2 = x_i^\top x_i - 2x_i^\top\mu_k + \mu_k^\top\mu_k$$
+
+where only the middle term is a genuine matrix product, so all pairwise squared distances follow from one matrix multiplication with no loop over observations, clusters, or dimensions. *Mini-Batch K-means* updates on batches of size $b$,
+
+$$\mu_k^{\text{new}} = \mu_k + \frac{b}{v_k + b}\Big(\frac{1}{b}\sum_{i=1}^b x_i - \mu_k\Big)$$
+
+where $v_k$ counts the points assigned to cluster $k$ so far, so the step size decays as the cluster accumulates evidence.
+
+**Failure modes:**
+
+1. Clusters are implicitly assumed spherical and of similar size, since the mean converges to the geometric center. Elongated, concentric, or unequal-density clusters break this.
+2. Only convex clusters can be recovered, the boundaries being the Voronoi cells of the centroids.
+3. Sensitive to initialization, hence to local minima; restart or use k-means++.
+4. Sensitive to scale, so features must be standardized or high-variance features dominate the distance.
+5. Every feature is weighted equally, and the method is sensitive to outliers and noise.
+6. Cost is $O(n \times k \times d \times \text{iterations})$.
+7. The curse of dimensionality: in high dimension all pairwise distances concentrate, so nearest and farthest neighbours become indistinguishable.
 
 ---
 ## Hierarchical Clustering
 
-Hierarchical clustering provides an alternative view on K--means in the sense that it does not require us to pre-specify the number of clusters $K$. It results in a tree-based representation of the observations, called a *dendogram*. It also requires to specify a measure of (dis)similarity between *groups* of observations. Hierarchical clustering can be done in two manners: \texit{agglomerative} or *divisive*. Agglomerative recursively merge a selected pair of clusters into a single one, where the pair chosen consists of the two groups with the smallest pairwise dissimilarity. Divisive methods start with the full dataset and recursively split one cluster into two new.\\
-The extent to which the hierarchical structure produced by a dendogram actually fits the data can be judged by the *cophenetic correlation coefficient*, which is the correlation between all the $N(N-1)/2$ pairwise dissimilarities $d(i,j)$ and their cophenetic dissimilarities $C(i,j)$ produced by the dendogram.
+Hierarchical clustering does not require $k$ to be fixed in advance. It produces a tree, the *dendrogram*, from which any number of clusters can be read off by cutting at a chosen height. It needs a dissimilarity between *groups* of observations, the linkage. Two directions:
 
-<!-- ![Diagram](/images/dendogram.jpg) -->
+1. *Agglomerative*, bottom up, repeatedly merging the pair of clusters with the smallest linkage dissimilarity;
+2. *Divisive*, top down, starting from the full dataset and recursively splitting one cluster in two.
 
 <p align="center">
 <img 
@@ -98,85 +94,76 @@ The extent to which the hierarchical structure produced by a dendogram actually 
 />
 </p>
 
+Cutting the tree at a height gives the clusters present at that dissimilarity: high cuts give few coarse clusters, low cuts give many fine ones. How well the tree actually represents the data is measured by the *cophenetic correlation*, the correlation between the $N(N-1)/2$ original pairwise dissimilarities $d(i,j)$ and the cophenetic dissimilarities $C(i,j)$, the heights at which $i$ and $j$ first merge.
 
 ### Cluster Linkage
-- ***Maximum / Complete*** linkage: $$\max_{a\in A, b \in B} d(a,b)$$
-- ***Minimum / single*** linkage (nearest neighbour): $$\min_{a\in A, b \in B} d(a,b)$$
-- ***Average*** linkage: $\frac{1}{ \| A \| \cdot \| B \|} = \sum_A \sum_B d(a,b)$
-- ***Centroid*** linkage: $$d(\mu_A, \mu_B)$$
-- ***Ward's Method*** (Minimum Variance): $\frac{\|A\|\cdot \|B\|}{\|A\|+\|B\|} \|\| \mu_a - \mu_b\|\|^2$
 
+For clusters $A$ and $B$:
+
+1. ***Complete (maximum)***: $\max_{a \in A, b \in B} d(a,b)$, giving compact clusters of similar diameter;
+2. ***Single (minimum, nearest neighbour)***: $\min_{a \in A, b \in B} d(a,b)$, which can chain into long straggly clusters but handles non-elliptical shapes;
+3. ***Average***: $\dfrac{1}{\|A\|\,\|B\|}\sum_{a \in A}\sum_{b \in B}d(a,b)$, a compromise between the two;
+4. ***Centroid***: $d(\mu_A, \mu_B)$, which can produce inversions where a merge happens below a previous one;
+5. ***Ward (minimum variance)***: $\dfrac{\|A\|\,\|B\|}{\|A\| + \|B\|}\|\mu_A - \mu_B\|^2$, the increase in within-cluster sum of squares caused by the merge, so Ward is the hierarchical analogue of the k-means objective.
 
 ---
-## Choice of Distance functions
-- ***Minkowski Distance***: $d(x,y) = \Big( \sum_i \| x_i - _i\|^q\Big)^{1/q} $
-    - ***Euclidean Distance*** for $q = 2$
-    - ***Manhattan Distance*** for $q = 1$
-    - ***Chebyshev Distance*** for $q \to \infty$
-- ***Mahalanobis Distance***: $$d(x,y) = \sqrt{(x-y)^\top \Sigma^{-1}(x-y)}$$
-    - Covariance aware: computes ordinary Euclidean distance in the correlation and variance corrected space
-    - Requires estimation of covariance matrix so can be unstable in high dimensions, and expensive
-- ***Cosine Distance*** ($1 -$ Cosine Similarity): $$d(x,y) = 1 - \frac{x \cdot y}{\|x\| \|y\|}$$
-    - Excellent for high dimensional sparse vector
-- ***Hamming distance*** (for *Categorical Data*): $$d(x,y) = \sum_i I(x_i \neq y_i)$$
-- ***Dynamic Time Warping*** (for *Time Series*): 
-    - First build a cost matrix where $d$ is usually the Euclidean distance: $C(t_1, t_2) = d(X_{t_1}, Y_{t_2})$ 
-    - Calculate cumulative path with Dynamic Programming:
-    $$D(t_1, t_2) = C(t_1, t_2) + \min \Big\{ D(t_1-1, t_2), D(t_1, t_2-1), D(t_1-1, t_2-1)\Big\}$$
-    - the ***DTW*** distance is the value for the final time indices. The path taken by the dynamic programming table is called the ***warping path***
+## Distance Functions
 
-        - Works even when time series are misaligned, different speeds or unequal lenghts
-        - Very effective for clustering and classification
-        - Computation is $O(n \times m)$ where $n$ and $m$ are the length of each series, so can be slow.
-        - Not a *true* metric (as triangle inequality fails)
-    
+- ***Minkowski***: $d(x,y) = \big(\sum_i\|x_i - y_i\|^q\big)^{1/q}$, giving *Manhattan* at $q = 1$, *Euclidean* at $q = 2$, and *Chebyshev* $\max_i\|x_i - y_i\|$ as $q \to \infty$.
+- ***Mahalanobis***: $d(x,y) = \sqrt{(x-y)^\top\Sigma^{-1}(x-y)}$, the Euclidean distance computed after whitening, so it is covariance aware and corrects for both scale and correlation. It requires estimating $\Sigma$, which is unstable and expensive in high dimension.
+- ***Cosine*** ($1 -$ Cosine Similarity): $d(x,y) = 1 - \dfrac{x \cdot y}{\|x\|\|y\|}$, ignoring magnitude and comparing direction only, which suits high-dimensional sparse vectors.
+- ***Hamming*** (for *Categorical Data*): $d(x,y) = \sum_i\mathbf{1}(x_i \neq y_i)$.
+- ***Dynamic Time Warping*** (for *Time Series*), of possibly different lengths or speeds. Build the cost matrix $C(t_1, t_2) = d(X_{t_1}, Y_{t_2})$, then accumulate by dynamic programming,
+
+$$D(t_1, t_2) = C(t_1, t_2) + \min\big\{D(t_1 - 1, t_2),\ D(t_1, t_2 - 1),\ D(t_1 - 1, t_2 - 1)\big\}$$
+
+the ***DTW*** distance being the value at the final indices and the route through the table the *warping path*. It handles misalignment and unequal lengths, costs $O(nm)$, and is not a *true* metric since the triangle inequality can fail.
 
 ---
 ## Metrics and Number of Clusters
 
 ### Clustering Metrics
-- ***WCSS / Inertia*** (Within-Cluster Sum of Squares): measures the total square distance from each point to its cluster center:
-    $$WCSS = \sum_{i=1}^k \sum_{x\in S_i} \| x - \mu_i\|^2$$
-    use it to compare different methods with the same number of clusters.
-- ***BCSS*** (Between-Cluster Sum of Squares)
-    $$BCSS = \sum_{i\neq j}^k \|\mu_i - \mu_j \|^2$$
-- ***TSS*** (Total Sum of Squares) $TSS = WCSS + BCSS$
-- ***Silhouette Coefficient*** (*Most popular internal metric*): For each point $i$:
-    - $a(i) = $ average distance from i to all other points in the same cluster 
-    - $b(i) = $ *minimum* average distance from i to points in any other cluster
 
-    $$Silhouette \hspace{0.5em} s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))}$$
+**Sum-of-squares decomposition:** with $\bar\mu$ the global mean,
 
-    - $s(i) \approx 1$ tells that the point is well clustered (far from other points), $s(i) \approx 0$ that the point is on the boundary between clusters, and $s(i) \approx -1$ that the point is probably in the wrong cluster
-    - $Overall \hspace{0.5em} Silhouette \hspace{0.5em} Score = \frac{1}{n} \sum s(i)$
-    - Works with any distance metrics. However it has $O(n^2)$ computation, is biased towards complex clusters and can be sensitive to noise and outliers.
-    - Silhouette plot generally shows the histogram of silhouettes per cluster
-- ***Davies-Bouldin Index***:
-        $$DB = \frac{1}{n} \sum_{i=1}^k \max_{i \neq j} \bigg( \frac{\sigma_i + \sigma_j}{d(\mu_i, \mu_j)}\bigg)$$
-    - $\sigma_i$ is the average distance of all elements in cluster $i$ to its centroid $\mu_i$
-    - $d(\mu_i, \mu_j)$ is the distance between centroids
-    - The range is $[0, \infty)$ and $0$ is optimal
-    - $\max_{i \neq j} \big( \frac{\sigma_i + \sigma_j}{d(\mu_i, \mu_j)}\big)$ is the worst-case similarity of cluster $i$ to another cluster, and $DB$ is the average worst-case similarity across all clusters
-    - $O(nK)$, but biased towards spherical clusters, sensitive to outliers, and might not work well with different density clusters
-- ***Dunn Index***:
-        $$D = \frac{\min_{1\leq i < j \leq k} d(i,j)}{\max_{1 \leq c \leq k} d'(c)}$$
-    - $d(i,j)$ is the distance between clusters $i$ and $j$, which can be any number of distance measure, such as the distance between the centroids of the clusters
-    - $d'(c)$ is a measure of intra-cluster distance for cluster $c$.  It can also be measured any metric, like the maximal distance between any two elements in cluster $c$ 
-    - The range is $[0, \infty)$ and higher is better
-    - $O(n^2)$ Complexity, extremely sensitive to outliers (numerator and denominator) and noise
-    
+$$\mathrm{WCSS} = \sum_{i=1}^k\sum_{x \in S_i}\|x - \mu_i\|^2 \qquad \mathrm{BCSS} = \sum_{i=1}^k|S_i|\,\|\mu_i - \bar\mu\|^2 \qquad \mathrm{TSS} = \mathrm{WCSS} + \mathrm{BCSS}$$
 
+The total is fixed by the data, so minimizing within-cluster scatter is the same as maximizing between-cluster scatter. WCSS alone compares methods only at equal $k$, since it decreases mechanically as $k$ grows.
 
-### Choosing the number of Clusters
-- ***Elbow Method***:
-    - The Elbow method consists of choosing a range of $k$ values, and computing the $WCSS$ for each $k$, and plotting it. Look for elbow where the rate of decrease sharply drops
-    - Works as $WCSS$ always decreases with higher $k$
-    - However can have some problems, like no clear elbow or multiple elbows.
-    - One can use the *Kneedle Algorithm*, which is an automatic detection algorithm, or the *Second Derivative* method
-- ***Silhouette Analysis***: Can theoretically work with other metrics but *Silhouette* score is always the preferred one. Just plot Silhouette vs. number of clusters and pick the highest one.
-- ***Dendogram***: Usually done for Hierarchical Clustering
+**Silhouette** (*most popular internal metric*): For point $i$, let $a(i)$ be its average distance to the other points in its own cluster and $b(i)$ the minimum, over other clusters, of its average distance to that cluster. Then
 
-<!-- ![Diagram](/images/elbow_silhouette.jpg) -->
+$$s(i) = \frac{b(i) - a(i)}{\max\{a(i), b(i)\}} \in [-1, 1] \qquad \text{score} = \frac{1}{n}\sum_i s(i)$$
+
+Values near $1$ mean well clustered, near $0$ mean on a boundary, and negative means probably assigned to the wrong cluster. It works with any distance, but costs $O(n^2)$, is biased toward convex clusters, and is sensitive to noise.
+
+The silhouette plot shows every point's $s(i)$, grouped by cluster and sorted within each, which exposes structure the average hides.
+
+<p align="center">
+<img 
+  src="{{ '/images/silhouette_plot.png' | relative_url }}"
+  data-light-src="{{ '/images/silhouette_plot.png' | relative_url }}"
+  data-dark-src="{{ '/images/silhouette_plot_dark.png' | relative_url }}"
+  alt="Diagram"
+/>
+</p>
+
+Cluster 2 is tight and well separated, sitting almost entirely above the average. Cluster 1 is acceptable but uniformly weaker. Cluster 3 has a long tail running to zero and below, so its lowest points sit closer to a neighbouring cluster than to their own and are probably misassigned. A high average silhouette can therefore coexist with one badly formed cluster, which is why the plot is read alongside the single number.
+
+**Davies–Bouldin:** with $\sigma_i$ the average distance from the members of cluster $i$ to its centroid,
+
+$$\mathrm{DB} = \frac{1}{k}\sum_{i=1}^k\max_{j \neq i}\bigg(\frac{\sigma_i + \sigma_j}{d(\mu_i, \mu_j)}\bigg)$$
+
+The inner maximum is the worst-case similarity of cluster $i$ to any other cluster, and DB averages that worst case. The range is $[0, \infty)$ and lower is better. Costs $O(nk)$, but is biased toward spherical clusters.
+
+**Dunn:**
+
+$$D = \frac{\min_{1 \leq i < j \leq k} d(i,j)}{\max_{1 \leq c \leq k} d'(c)}$$
+
+the smallest between-cluster distance over the largest within-cluster diameter. Range $[0, \infty)$, higher is better. Costs $O(n^2)$ and is extremely sensitive to outliers, which enter both numerator and denominator.
+
+### Choosing the Number of Clusters
+
+Plot a criterion against $k$ and read off the turning point.
 
 <p align="center">
 <img 
@@ -187,112 +174,68 @@ The extent to which the hierarchical structure produced by a dendogram actually 
 />
 </p>
 
-*Note: This is not supposed to represent plots for the same dataset / clustering method. Those are just illustrative. And yes, the right choice looks like $K=4$ for the Elbow plot, and $K=5$ for the Silhouette*
+1. ***Elbow Method***: compute WCSS over a range of $k$ and look for the point where the rate of decrease drops sharply. It always decreases, so the elbow rather than the minimum is the signal. It can fail when there is no clear elbow or several; the *Kneedle Algorithm* or a *second-derivative* rule automate the choice.
+2. ***Silhouette Analysis***: plot the silhouette score against $k$ and take the maximum. Unlike WCSS this has a genuine interior optimum.
+3. ***Dendrogram***: for hierarchical clustering, cut where the merge heights jump.
 
-
-
+The two plots above are illustrative and need not agree: here the elbow suggests $k = 4$ and the silhouette $k = 5$, which is a typical amount of disagreement.
 
 ---
 ## Gaussian Mixture Models
-GMM is a probabilistic model assuming the data is generated from a mixture of $K$ Gaussian distribution with unkownd parameters. The model takes the following form:
-$$p(x) = \sum_{k=1}^K \pi_k \cdot \mathcal{N}(x |\mu_k, \Sigma_k)$$
-- Soft clustering: each point has a (posterior) probability of belonging to each cluster
-- Flexible cluster shapes (can have different orientations, sizes)
-- Assumes Gaussian (fails it data isn't $\approx \mathcal{N})$
-- Sensitive so initialization
-- Requires to specify $K$ upfront
-- Expensive in parameters and has requires a lot of data as can be unstable in high dimensions
 
+A GMM assumes the data comes from a mixture of $K$ Gaussians,
 
-**Likelihood to maximize**:
+$$p(x) = \sum_{k=1}^K\pi_k\,\mathcal{N}(x \mid \mu_k, \Sigma_k) \qquad \sum_k\pi_k = 1$$
 
-$$
-L(\theta)
-= \prod_{i=1}^n \sum_{k=1}^K \pi_k\, \mathcal{N}(x_i \mid \mu_k, \Sigma_k)
-\qquad \iff \qquad
-\ell(\theta)
-= \sum_{i=1}^n \log\!\left( \sum_{k=1}^K \pi_k\, \mathcal{N}(x_i \mid \mu_k, \Sigma_k) \right)
-$$
+Compared to k-means it gives soft assignments (each point has a posterior probability of belonging to each component) and flexible cluster shapes, since each $\Sigma_k$ carries its own orientation and scale. The costs: it assumes Gaussianity, is sensitive to initialization, still needs $K$ specified, and has many parameters, so it is unstable in high dimension unless the covariances are constrained.
 
-The presence of the logarithm of a sum prevents closed-form parameter updates, making direct maximization intractable.
+**The likelihood is intractable directly:**
 
-**Posterior Probabilities (Soft Assignments)**:\
-Using Bayes' rule, the responsibility of component $k$ for point $x_i$ is:
+$$L(\theta) = \prod_{i=1}^n\sum_{k=1}^K\pi_k\,\mathcal{N}(x_i \mid \mu_k, \Sigma_k) \qquad \iff \qquad \ell(\theta) = \sum_{i=1}^n\log\Big(\sum_{k=1}^K\pi_k\,\mathcal{N}(x_i \mid \mu_k, \Sigma_k)\Big)$$
 
-$$
-\gamma_{ik}
-= P(z_i = k \mid x_i, \theta)
-= \frac{\pi_k\, \mathcal{N}(x_i \mid \mu_k, \Sigma_k)}
-       {\sum_{j=1}^K \pi_j\, \mathcal{N}(x_i \mid \mu_j, \Sigma_j)}.
-$$
+The logarithm of a sum does not separate, so there is no closed-form maximizer.
 
-**Complete-Data Log-Likelihood**:\
-If the latent assignment indicators $z_{ik}$ were known:
+**Responsibilities:** by Bayes, the posterior probability that component $k$ generated $x_i$ is
 
-$$
-\ell_c(\theta)
-= \sum_{i=1}^n \sum_{k=1}^K
-z_{ik}\,\big[ \log \pi_k + \log \mathcal{N}(x_i \mid \mu_k, \Sigma_k) \big].
-$$
+$$\gamma_{ik} = \mathbb{P}(z_i = k \mid x_i, \theta) = \frac{\pi_k\,\mathcal{N}(x_i \mid \mu_k, \Sigma_k)}{\sum_{j=1}^K\pi_j\,\mathcal{N}(x_i \mid \mu_j, \Sigma_j)}$$
 
-The ***EM*** algorithm optimizes the *expected* complete-data log-likelihood:
+If the latent indicators $z_{ik}$ were observed, the complete-data log-likelihood would separate,
+
+$$\ell_c(\theta) = \sum_{i=1}^n\sum_{k=1}^K z_{ik}\big[\log\pi_k + \log\mathcal{N}(x_i \mid \mu_k, \Sigma_k)\big]$$
+
+and EM works by maximizing its expectation instead.
 
 ### Expectation Maximization
-The ***EM*** algo is an 2-step iterative optimization technique to estimat ethe unkown parameters in probabilistic models.
 
-- ***E-Step (Expectation Step)***: 
+- ***E-Step (Expectation Step)***: with the current parameters $\theta^{(t)}$, compute the responsibilities
 
-    $$
-    \gamma_{ik}^{(t)}
-    = P(z_i = k \mid x_i, \theta^{(t)})
-    = \frac{\pi_k^{(t)}\, \mathcal{N}(x_i \mid \mu_k^{(t)}, \Sigma_k^{(t)})}
-           {\sum_{j=1}^K \pi_j^{(t)}\, \mathcal{N}(x_i \mid \mu_j^{(t)}, \Sigma_j^{(t)})}.
-    $$
+$$\gamma_{ik}^{(t)} = \frac{\pi_k^{(t)}\,\mathcal{N}(x_i \mid \mu_k^{(t)}, \Sigma_k^{(t)})}{\sum_{j=1}^K\pi_j^{(t)}\,\mathcal{N}(x_i \mid \mu_j^{(t)}, \Sigma_j^{(t)})}$$
 
-    - Compute the posterior “responsibility” that component $k$ generated point $x_i$ by using the current parameter estimates $\theta^{(t)} = \{\pi_k^{(t)},\mu_k^{(t)},\Sigma_k^{(t)}\}$.
-    - Converts latent assignments $z_{ik}$ into soft probabilities $\gamma_{ik}$, i.e. expected values of the hidden variables $z_{ik}$.
-    
-- ***M-Step (Maximization Step)***
+turning the hard latent assignments $z_{ik}$ into soft probabilities, which are exactly their conditional expectations.
 
-    $$
-    \pi_k^{(t+1)} = \frac{1}{n}\sum_{i=1}^n \gamma_{ik}^{(t)}, 
-    \qquad
-    \mu_k^{(t+1)} = \frac{\sum_{i=1}^n \gamma_{ik}^{(t)} x_i}{\sum_{i=1}^n \gamma_{ik}^{(t)}},
-    $$
+- ***M-Step (Maximization Step)***: treat the responsibilities as if they were correct and take the weighted maximum-likelihood estimates,
 
-    $$
-    \Sigma_k^{(t+1)} = 
-    \frac{\sum_{i=1}^n \gamma_{ik}^{(t)} (x_i - \mu_k^{(t+1)})(x_i - \mu_k^{(t+1)})^\top}
-         {\sum_{i=1}^n \gamma_{ik}^{(t)}}
-    $$
+$$\pi_k^{(t+1)} = \frac{1}{n}\sum_{i=1}^n\gamma_{ik}^{(t)} \qquad \mu_k^{(t+1)} = \frac{\sum_i\gamma_{ik}^{(t)}x_i}{\sum_i\gamma_{ik}^{(t)}}$$
 
-    - Update mixture weights, means, and covariance matrices using $\gamma_{ik}^{(t)}$, assuming those the soft assignments are correct. These are basically the Maximum Likelihood Estimates of the parameters, given the soft-assignments.
-    - Maximizes the expected complete-data log-likelihood:
-            $
-            Q(\theta \mid \theta^{(t)}) = 
-            \mathbb{E}_{z|X,\theta^{(t)}}[\ell_c(\theta)].
-            $
-        
+$$\Sigma_k^{(t+1)} = \frac{\sum_i\gamma_{ik}^{(t)}\big(x_i - \mu_k^{(t+1)}\big)\big(x_i - \mu_k^{(t+1)}\big)^\top}{\sum_i\gamma_{ik}^{(t)}}$$
 
-When I was an undergraduate student, I always found the Expectation-Maximization algorithm very unintuitive. I learned it many times, but it never stuck, because I never truly understood it. I'm still no pro of that EM procedure, but maybe this will help an unfortunate student that wished his exam was on supervised learning only. 
+This maximizes the expected complete-data log-likelihood $Q(\theta \mid \theta^{(t)}) = \mathbb{E}_{z \mid X, \theta^{(t)}}[\ell_c(\theta)]$.
 
-It turns out that ***LLoyd's Algorithm*** for K-means is a special case of the ***Expectation Maximization*** procedure. Actually, under certain (very strict) conditions, the two are equivalent. You would essentially need each component to have equal, spherical covariance, the variances going to 0, each cluster having equal mixing weight (i.e. equal $\pi_k$), and the procedure itself to be a hard assignment method instead of a soft, probabilistic algorithm. This doesn't help much does it?
+When I was an undergraduate student, I always found the Expectation-Maximization algorithm very unintuitive. I learned it many times, but it never stuck, because I never truly understood it. I'm still no pro of that EM procedure, but maybe this will help an unfortunate student that wished his exam was on supervised learning only.
 
-What if I told you the ***E-Step*** was equivalent to the ***Assignment Step*** and the ***M-Step*** to the ***Update Step***? One could see that the E-step calculates the expected membership probabilities for (or associates the cluster center to) each data point under the current parameter estimates (or centroids positions), and the M-Step updates the model parameters (centroid positions) given the current membership probabilities (cluster assignments). 
+It turns out that ***Lloyd's Algorithm*** for K-means is the hard-assignment limit of the ***Expectation Maximization*** procedure. Actually, under certain (very strict) conditions, the two are equivalent: taking all mixing weights $\pi_k$ equal and all $\Sigma_k = \sigma^2 I$ with $\sigma^2 \to 0$, the responsibilities collapse to $0$ or $1$ and the two coincide exactly. This doesn't help much does it?
 
-**Convergence**
-- The observed (expected) log-likelihood increases monotonically (actually non-decreasing). 
-- EM converges to a stationary point, however it might be a saddle point or a local maximum
+What if I told you the ***E-Step*** was equivalent to the ***Assignment Step*** and the ***M-Step*** to the ***Update Step***? The E-step computes membership given the current centers (the expected membership probabilities of each data point under the current parameter estimates, or centroid positions), and the M-step moves the centers given the memberships (updates the model parameters, or centroid positions, given the current cluster assignments).
 
- \
- <!-- \ -->
+**Convergence:**
+- The observed log-likelihood is non-decreasing at every iteration, so EM converges.
+- But only to a stationary point, which may be a local maximum or a saddle. Multiple restarts are standard.
 
-
-This is all for today. Actually, this is way too much for any day. 
+This is all for today. Actually, this is way too much for any day.
 
 ---
 ## References
-**The Elements ofStatistical Learning: Data Mining, Inference, and Prediction.** (2009)\
+**The Elements of Statistical Learning: Data Mining, Inference, and Prediction.** (2009)\
 Trevor Hastie, Robert Tibshirani, Jerome Friedman\
 [Book](https://hastie.su.domains/ElemStatLearn/){:target="_blank"}
 
@@ -305,5 +248,5 @@ A. P. Dempster, N. M. Laird, D. B. Rubin\
 [Paper](https://www.eng.auburn.edu/~roppeth/courses/00sum13/7970%202013A%20ADvMobRob%20sp13/literature/paper%20W%20refs/dempster%20EM%201977.pdf){:target="_blank"}
 
 **The EM Algorithm and Extensions** (2008)\
-GJ McLachlan, T Krishnan\\
+GJ McLachlan, T Krishnan\
 [Book](https://books.google.fr/books?hl=en&lr=&id=NBawzaWoWa8C&oi=fnd&pg=PR3&dq=+Geoffrey+McLachlan+and+Thriyambakam+Krishnan.+The+EM+Algorithm+and+Extensions&ots=tqc6TR_yvR&sig=XzSWL-iHA0chDfZJ2TfqHSp0LAM&redir_esc=y#v=onepage&q=Geoffrey%20McLachlan%20and%20Thriyambakam%20Krishnan.%20The%20EM%20Algorithm%20and%20Extensions&f=false){:target="_blank"}

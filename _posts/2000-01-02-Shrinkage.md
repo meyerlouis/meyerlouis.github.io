@@ -5,230 +5,164 @@ subtitle: "Ridge, Lasso and Elastic-Net: the 3 musketeers. (I actually only use 
 ---
 
 ## The Problem
-Shrinkage methods are used for two reasons: to deal with *multicollinearity* and do *variable selection*. When high multicollinearity is present, the design matrix $X^TX$ becomes degenerate. When perfect multicollinearity is present, $rank(X^TX) < n$ and the matrix is singular and thus non-invertible, so it is impossible to solve OLS. As a motivating example, perform the eigendecomposition of the design matrix:
 
-$$X^TX = Q\Lambda Q^{-1}$$
+Shrinkage addresses multicollinearity and performs variable selection. Eigendecompose $X^\top X = Q\Lambda Q^\top$, then $(X^\top X)^{-1} = Q\Lambda^{-1}Q^\top$, and when $X^\top X$ is near singular some eigenvalues are near zero, so the $1/\lambda_i$ blow up and $\hat\beta$ explodes. Under perfect multicollinearity $\operatorname{rank}(X^\top X) < p$, the matrix is not invertible, and OLS has no solution. Because $\operatorname{Var}(\hat\beta) = \sigma^2(X^\top X)^{-1}$ and $\operatorname{Var}(\hat y_0) = \sigma^2 x_0^\top(X^\top X)^{-1}x_0$, ill-conditioning inflates the variance of both the estimator and the forecast.
 
-Here $Q$ is a $n\times n$ matrix whose $i$th column is the $i$th eigenvector of $X^TX$. $\Lambda$ is a diagonal matrix of the eigenvalues of $X^TX$. In the case of **non**-perfect multicollinearity, i.e. when no eigenvalues are 0, then $X^TX$ is invertible and its inverse is given by:
+**Theorem (Existence, Hoerl–Kennard):** There always exists a $\lambda > 0$ for which the ridge estimator has strictly smaller mean squared error than OLS, $\mathbb{E}\|\hat\beta_{\text{ridge}} - \beta\|^2 < \mathbb{E}\|\hat\beta_{\text{ols}} - \beta\|^2$.
 
-$$(X^TX)^{-1} = Q\Lambda^{-1} Q^{-1}$$
+So regularization serves both inference (stable, interpretable coefficients) and prediction (lower out-of-sample MSE).
 
-where $\Lambda^{-1}$ is the diagonal matrix with inverse eigenvalues, e.g. $1/\lambda_i$. One can easily see that if $X^TX$ is close to singular then some if its eigenvalues will be close to 0, making exploding $\beta$.
-
+<hr class="post-divider">
+    
 ## Ridge
+
 ### General Form
-Instead of minimizing $\|y-X\beta\|^2$ (MSE) we now minimize $\|y-X\beta\|^2 + \lambda \|\beta\|^2$. This can also be formulated as
 
-$$\textit{minimize} \quad RSS \quad \text{subject to} \quad \Sigma\beta^2<t$$
+Ridge adds an $L_2$ penalty,
 
-$$\hat{\beta}{_{RIDGE} = (X^TX + \lambda I)^{-1}X^Ty}$$
+$$\hat\beta_{\text{ridge}} = \arg\min_\beta\ \|Y - X\beta\|^2 + \lambda\|\beta\|^2 \quad \iff \quad \min_\beta\ \mathrm{RSS}\ \text{ s.t. } \textstyle\sum\beta_j^2 \leq t$$
 
-The term $\lambda \|\beta\|^2$ is called the *shrinkage penalty*. When it is 0 we fall back to OLS. The $\hat{\beta}$ in OLS are scale invariant, multiplying $X_i$ by $c$ gives a new $\hat{\beta}_i$ scaled by $1/c$. So we must **normalize** the predictors before applying any shrinkage method.
-Ridge regression’s advantage over least squares is rooted in the bias-variance trade-off. As $\lambda$ increases, the flexibility of the ridge regression fit decreases, leading to decreased variance but increased bias. We can see that in the case where $X^TX$ is singular, the additional diagonal term $\lambda I$ will push eigenvalues slightly upward, forcing it ot be non-singular. This is especially useful when $p > n$.
+with closed form
+
+$$\hat\beta_{\text{ridge}} = (X^\top X + \lambda I)^{-1}X^\top Y$$
+
+which exists for any $\lambda > 0$ even when $p > n$, since $\lambda I$ lifts every eigenvalue away from zero. Ridge is not scale-invariant: the OLS $\hat\beta$ are scale-equivariant (multiplying $X_j$ by $c$ rescales $\hat\beta_j$ by $1/c$) but the penalty is not, so the predictors must be standardized first. Larger $\lambda$ lowers variance and raises bias.
+
 ### As SVD
-Setting $X = UDV^T$ with $U$ and $D$ being unitary matrix (orthogonal if $X$ is real).\\ 
-The columns of $V$ are the *right-singular vectors* and eigenvectors of $X^TX$ and the columns of $U$ are the *left-singular vectors* and eigenvectors of $XX^T$. The non-zero elements of D are the *singular values*, i.e. the square roots of the eigenvalues of $X^TX$ (or $XX^T$). But you already knew that, right? Right?
 
-$$\begin{align*}
-\hat{\beta} &= (X^T X)^{-1} X^T Y\\
-&= (V D U^T U D V^T)^{-1} V D U^T Y\\
-&= (V D^2 V^T)^{-1} V D U^T Y\\
-&= V D^{-2} V^T V D U^T Y\\
-&= V D^{-1} U^T Y
-\end{align*}$$
+Setting $X = UDV^\top$ with $U$ and $V$ orthogonal. The columns of $V$ are the *right-singular vectors* and eigenvectors of $X^\top X$, and the columns of $U$ are the *left-singular vectors* and eigenvectors of $XX^\top$. The non-zero elements of $D$ are the *singular values* $\sigma_i$, i.e. the square roots of the eigenvalues of $X^\top X$ (or $XX^\top$). But you already knew that, right? Right?
+
+The OLS solution is $\hat\beta_{\text{ols}} = VD^{-1}U^\top Y = VD^+U^\top Y$, and
+
+$$\hat\beta_{\text{ridge}} = (VD^2V^\top + \lambda I)^{-1}VDU^\top Y = V(D^2 + \lambda I)^{-1}DU^\top Y = V\operatorname{diag}\Big(\tfrac{\sigma_i}{\sigma_i^2 + \lambda}\Big)U^\top Y$$
+
+Written through the pseudoinverse, this separates the OLS part from the shrinkage filter,
+
+$$\hat\beta_{\text{ridge}} = V\,\operatorname{diag}\Big(\tfrac{\sigma_i^2}{\sigma_i^2 + \lambda}\Big)\,D^+U^\top Y$$
+
+where $D^+U^\top Y$ is the OLS coordinate and $\tfrac{\sigma_i^2}{\sigma_i^2 + \lambda} \in (0, 1)$ is the filter. Equivalently, acting on the OLS estimate in the eigenbasis of $X^\top X$,
+
+$$\hat\beta_{\text{ridge}} =
+\underbrace{V}_{\substack{\text{rotate back to}\\\text{original space}}}
+\ \underbrace{\operatorname{diag}\Big(\tfrac{\sigma_i^2}{\sigma_i^2 + \lambda}\Big)}_{\text{rescale eigenvalues}}
+\ \underbrace{V^\top}_{\substack{\text{rotate into}\\\text{eigenspace}}}
+\ \hat\beta_{\text{ols}}$$
+
+The filter $f_i = \sigma_i^2/(\sigma_i^2 + \lambda)$ leaves high-variance directions (large $\sigma_i$) almost untouched and drives low-variance directions toward zero, so covariates accounting for little variance shrink first.
+
+Writing $u_i$ for the columns of $U$, the OLS fitted values are the projection of $Y$ onto the column space of $X$,
+
+$$\hat Y_{\text{ols}} = X\hat\beta_{\text{ols}} = UDV^\top\,VD^{-1}U^\top Y = UU^\top Y = \sum_i u_i\,(u_i^\top Y)$$
+
+while ridge computes the same coordinates $u_i^\top Y$ but shrinks each one by the filter before reconstructing,
+
+$$\hat Y_{\text{ridge}} = X\hat\beta_{\text{ridge}} = UD(D^2 + \lambda I)^{-1}DU^\top Y = \sum_i u_i\,\frac{\sigma_i^2}{\sigma_i^2 + \lambda}\,(u_i^\top Y)$$
 
 
-$$
-\begin{align*}
-\hat{\beta}_{RIDGE} &= (X^T X + \lambda I_p)^{-1} X^T Y\\
-% &= (V D U^T U D V^T + \lambda I_p)^{-1} V D U^T \\
-&= (V D^2 V^T + \lambda I_p)^{-1} V D U^T Y\\
-&= (V (D^2 + \lambda V^T V))^{-1} V D U^T Y\\
-&= V (D^2 + \lambda I_n)^{-1} V^T V D U^T Y\\
-&= V (D^2 + \lambda I_n)^{-1} D U^T Y\\
-\end{align*}
-$$
+### Tuning $\lambda$
 
+The leave-one-out shortcut carries over with the ridge hat matrix $H_{\text{ridge}}(\lambda)$: the deleted residual is again the full residual inflated by one minus the leverage,
 
-The ridge estimates are essentially the OLS estimates $\hat{\beta}=V D^{-1} U^T Y=V (D^2)^{-1}D U^T Y$ multiplied by the term $\frac{D^2}{D^2 + \lambda I_n}$, which is always between 0 and 1. This has the effect of shifting the coefficient estimates downward. The coefficients with a smaller corresponding value $d_i$ (the $i$th diagonal of $D$) will be whrunk more than coefficients with a large $d_i$. So covariates that account for very little of the variance in the data will be shifted to zero more quickly.
+$$e_{(i)}(\lambda) = \frac{e_i(\lambda)}{1 - h_{ii}(\lambda)}$$
 
+so the leave-one-out MSE is read off a single fit at each $\lambda$,
 
----
+$$\mathrm{CV}(\lambda) = \frac{1}{n}\sum_i\Big(\frac{e_i(\lambda)}{1 - h_{ii}(\lambda)}\Big)^2$$
+
+and generalized cross-validation replaces $h_{ii}(\lambda)$ by the average $\operatorname{tr}(H_{\text{ridge}})/n$. Pick the $\lambda$ minimizing $\mathrm{CV}(\lambda)$.
+
+<hr class="post-divider">
 ## Lasso
-### General Form
-Lasso differs from Ridge by minimizing the L1 norm of the $\beta$ coefficients instead of L2: we know minimize $\|y-X\beta\|^2 + \lambda |\beta|$. The Lasso does not have a closed-form solution as you cannot directly differentiate this expression w.r.t $\beta$ due to the absolute value norm. This can also be formulated as
 
-$$\textit{minimize} \quad RSS \quad \text{subject to} \quad \Sigma|\beta|<t$$
+Lasso penalizes the $L_1$ norm,
 
-Lasso has the property that it can set coefficients $\beta_j$ directly to 0. This can be interpreted through the **subgradient conditions**:
+$$\hat\beta_{\text{lasso}} = \arg\min_\beta\ \|Y - X\beta\|^2 + \lambda\|\beta\|_1 \quad \iff \quad \min_\beta\ \mathrm{RSS}\ \text{ s.t. } \textstyle\sum|\beta_j| \leq t$$
 
-$$\begin{align*}
-L(\beta) &= \frac{1}{2}\|y-X\beta\|^2 + \lambda |\beta|\\
-\partial L(\beta) &= X^T(X\beta - y) + \lambda\partial |\beta| \quad \text{(full gradient on first term)}
-\end{align*}$$
+with no closed form, since $ \| \beta \| $ is not differentiable at zero. Optimality is read off the subgradient of $L(\beta) = \frac{1}{2}\|Y - X\beta\|^2 + \lambda\|\beta\|_1$: at the minimum $0 \in \partial L$, so per coordinate
 
-The optimality condition says that $\hat{\beta}$ minimizes $L$ iff $0 \in \partial L(\hat{\beta})$. For coefficient $j$, this becomes: $$0 = X_j^T(X\hat{\beta} - y) + \lambda s_j \quad \text{where } s_j \in \partial \|\hat{\beta}_j\|$$
+$$X_j^\top(X\hat\beta - Y) + \lambda s_j = 0 \qquad s_j \in \partial|\hat\beta_j|$$
 
-**Case 1:** If $\hat{\beta_j}= 0$
+**Case 1, $\hat\beta_j = 0$:** Then $s_j \in [-1, 1]$, which is feasible iff $\big\vert X_j^\top(X\hat\beta - Y)\big\vert \leq \lambda$. So a coefficient is exactly zero when the residual correlation of feature $j$, its partial correlation after orthogonalizing out the other features, is at most $\lambda$.
 
-Then $s_j \in [-1, 1]$, so we need:
+**Case 2, $\hat\beta_j \neq 0$:** Then $s_j = \operatorname{sign}(\hat\beta_j)$, so $X_j^\top(X\hat\beta - Y) = -\lambda\operatorname{sign}(\hat\beta_j)$: the penalty gradient is $\pm\lambda$, constant regardless of the magnitude of $\beta_j$.
 
-$$
-\begin{align*}
-0 &= X_j^T(X\hat{\beta} - y) + \lambda s_j \\
-s_j &= -\frac{1}{\lambda}X_j^T(X\hat{\beta} - y)
-\end{align*}
-$$
+The penalty gradient $\partial(\lambda \|\beta \|) = \lambda\operatorname{sign}(\beta)$ is a flat tax of size $\lambda$ applied to the partial feature. When the partial correlation drops below $\lambda$ the coefficient is taxed to zero. In the orthonormal case $X^\top X = I$ this is exactly soft-thresholding, coordinatewise,
 
-This is valid only if $$\|s_j\| \leq 1$$, which means:
+$$\hat\beta_{\text{lasso},j} = S_\lambda(\hat\beta_{\text{ols},j}) = \operatorname{sign}(\hat\beta_{\text{ols},j})\,\big(|\hat\beta_{\text{ols},j}| - \lambda\big)_+$$
 
-$$
-\begin{equation*}
-\left|X_j^T(X\hat{\beta} - y)\right| \leq \lambda
-\end{equation*}
-$$
+Ridge, by contrast, has gradient $2\lambda\beta_j$, proportional to the current value, so large coefficients shrink more and small ones asymptotically approach but never reach zero.
 
-Therefore, $\hat{\beta}_j = 0$ is optimal if and only if the correlation between the residual and feature $j$ is less than $\lambda$.
+<hr class="post-divider">
+## Principal Component Regression
 
+PCR drops the ill-conditioned directions outright. Take the SVD $X = UDV^\top$, keep the $k$ components with the largest singular values, and regress $Y$ on those, discarding the rest. It is the hard-thresholding cousin of ridge: ridge multiplies direction $i$ by the smooth filter $\sigma_i^2/(\sigma_i^2 + \lambda)$, while PCR multiplies by $1$ for $i \leq k$ and $0$ for $i > k$. Since the smallest-$\sigma_i$ directions carry the largest variance inflation $1/\sigma_i^2$, removing them stabilizes the fit. Its weakness is that the components are chosen from the variance of $X$ alone, ignoring $Y$, so a low-variance direction that is highly predictive can be discarded.
 
-**Case 2:** If $\hat{\beta_j} \neq 0$
-
-Then $s_j = \text{sign}(\hat{\beta}_j)$, so:
-
-$$\begin{equation*}
-X_j^T(X\hat{\beta} - y) = -\lambda \cdot \text{sign}(\hat{\beta}_j)
-\end{equation*}$$
-
-The subgradient is constant ($\pm\lambda$) regardless of the magnitude of $\beta_j$. This creates a constant push toward zero of size $\lambda$, which drives coefficients smaller than $\lambda$ to 0.
-Ridge regression ($\lambda\|\beta\|^2$), whose gradient $2\lambda\beta_j$ is proportional to the current value—large coefficients get large shrinkage, small ones get small shrinkage, asymptotically approaching but never reaching zero.
-
-
----
+<hr class="post-divider">
 ## Bayesian Interpretation
-We can explain Ridge and Lasso through a Bayesian interpretation"
-$$\mathbb{P}(\beta|X,Y) \propto \mathcal{L}(Y|X, \beta) \cdot \mathbb{P}(\beta)$$
-with $\mathbb{P}(\beta|X,Y)$ being the posterior distribution of $\beta$ given the data, $\mathcal{L}(Y|X, \beta)$ the likelihood and $\mathbb{P}(\beta)$ our prior on the distribution of $\beta$.\\
-Given $Y|X, \beta \sim N(X\beta,\sigma^2I)$
 
-$$
-\mathcal{L}(Y|X, \beta) = \Pi \frac{1}{\sqrt{2\pi\sigma^2}} \exp{\biggl\{ -\frac{(y-X\beta)^2}{2\sigma^2}\biggl\}} = \Big( \frac{1}{\sqrt{2\pi\sigma^2}}\Big)^n \exp{\biggl\{-\frac{1}{2\sigma^2}\Sigma \varepsilon_i^2\biggl\}} 
-$$
-### Ridge
-**Assumes Gaussian prior:** $\beta \sim N(0, \tau^2)$
-$$\begin{align*}
-    \hat{\beta}_{RIDGE} = argmax \hspace{.4em} \mathbb{P}(\beta|X,Y) &= 
-    argmax \hspace{.4em}  \Bigg\{
-   \Big( \frac{1}{\sqrt{2\pi\sigma^2}}\Big)^n \exp{\biggl\{-\frac{1}{2\sigma^2}\Sigma \varepsilon_i^2\biggl\}} \cdot
-   \Big( \frac{1}{\sqrt{2\pi\tau^2}}\Big)^p \exp{\biggl\{-\frac{1}{2\tau^2}\Sigma \beta_i^2\biggl\}}
-   \Bigg\}\\
-   &= argmax \hspace{.4em}  \Bigg\{ \exp{\biggl\{-\frac{1}{2\sigma^2}\Sigma \varepsilon_i^2 -\frac{1}{2\tau^2}\Sigma \beta_i^2\biggl\}}
-   \Bigg\}\\ 
-    &= argmin \hspace{.4em}  \bigg\{ \frac{1}{2\sigma^2}\Sigma \varepsilon_i^2 +\frac{1}{2\tau^2}\Sigma \beta_i^2\biggl\}
-   \bigg\}\\ 
-   &= argmin \hspace{.4em}  \bigg\{ RSS +\frac{\sigma^2}{\tau^2}\Sigma \beta_i^2\biggl\} \qquad \qquad \text{which is RIDGE with $\lambda = \frac{\sigma^2}{\tau^2}$} \\  
-\end{align*}$$
-### Lasso
-**Assumes Laplace / Double exponential prior:** $$\beta \sim \frac{1}{\sqrt{2b}} \exp{\big\{ - \frac{\Sigma |\beta|}{b}\big\}}$$
-$$\begin{align*}
-    \hat{\beta}_{RIDGE} = argmax \hspace{.4em} \mathbb{P}(\beta|X,Y) &= 
-    argmax \hspace{.4em}  \Bigg\{
-   \Big( \frac{1}{\sqrt{2\pi\sigma^2}}\Big)^n \exp{\biggl\{-\frac{1}{2\sigma^2}\Sigma \varepsilon_i^2\biggl\}} \cdot
-   \Big( \frac{1}{\sqrt{2b}}\Big)^p \exp{\biggl\{-\frac{1}{b}\Sigma |\beta_i|\biggl\}}
-   \Bigg\}\\
-   &= argmax \hspace{.4em}  \Bigg\{ \exp{\biggl\{-\frac{1}{2\sigma^2}\Sigma \varepsilon_i^2 -\frac{1}{b}\Sigma |\beta_i|\biggl\}}
-   \Bigg\}\\ 
-    &= argmin \hspace{.4em}  \bigg\{ \frac{1}{2\sigma^2}\Sigma \varepsilon_i^2 +\frac{1}{b}\Sigma |\beta_i|\biggl\}
-   \bigg\}\\ 
-   &= argmin \hspace{.4em}  \bigg\{ RSS +\frac{2\sigma^2}{b}\Sigma |\beta_i|\biggl\} \qquad \qquad \text{which is LASSO with $\lambda = \frac{2\sigma^2}{b}$} \\  
-\end{align*}$$
+Ridge and Lasso are posterior modes under a Gaussian likelihood with different priors,
 
-
-In this view, Lasso and Ridge are Bayes estimates with different priors. They are derived as posterior modes, that is, maximizers of the posterior. It is more common to use the mean of the posterior as the Bayes estimate. Ridge regression is also the posterior mean, but the Lasso is not.
-
-<!-- ![Diagram](/images/Gaussian_Laplace_grey.png) -->
+$$\mathbb{P}(\beta \mid X, Y) \propto \mathcal{L}(Y \mid X, \beta)\,\mathbb{P}(\beta) \qquad \mathcal{L}(Y \mid X, \beta) = \Big(\tfrac{1}{\sqrt{2\pi\sigma^2}}\Big)^n\exp\Big\{-\tfrac{1}{2\sigma^2}\textstyle\sum\varepsilon_i^2\Big\}$$
 
 <p align="center">
 <img 
-  src="{{ '/images/Gaussian_Laplace_grey.png' | relative_url }}"
-  data-light-src="{{ '/images/Gaussian_Laplace_grey.png' | relative_url }}"
+  src="{{ '/images/Gaussian_Laplace.jpg' | relative_url }}"
+  data-light-src="{{ '/images/Gaussian_Laplace.jpg' | relative_url }}"
   data-dark-src="{{ '/images/Gaussian_Laplace_dark.png' | relative_url }}"
   alt="Diagram"
 />
 </p>
 
+**Ridge, Gaussian prior** $\beta \sim \mathcal{N}(0, \tau^2)$:
 
-One can easily see how the definitions of regularization as priors on the distribution of the coefficients relate to their shrinking behavior. Imagine your OLS solution $\hat{\beta}$ as a point on one of the two prior curves (Gaussian for Ridge, Laplace for Lasso), and the shrinking process as the effect of these priors “pulling" the estimate toward 0. Because the Laplace prior has a sharp peak at $0$, increasing the regularization coefficient $\lambda$ can pull a coefficient exactly to $0$. In contrast, the Gaussian prior is smooth at $0$, so the corresponding Ridge penalty only shrinks coefficients continuously toward $0$ and never forces them to be exactly zero.
+$$\begin{align*}
+\hat\beta_{\text{ridge}} = \arg\max_\beta\ \mathbb{P}(\beta \mid X, Y)
+&= \arg\max_\beta\ \Big(\tfrac{1}{\sqrt{2\pi\sigma^2}}\Big)^n\exp\Big\{-\tfrac{1}{2\sigma^2}\textstyle\sum\varepsilon_i^2\Big\} \cdot \Big(\tfrac{1}{\sqrt{2\pi\tau^2}}\Big)^p\exp\Big\{-\tfrac{1}{2\tau^2}\textstyle\sum\beta_i^2\Big\} \\
+&= \arg\max_\beta\ \exp\Big\{-\tfrac{1}{2\sigma^2}\textstyle\sum\varepsilon_i^2 - \tfrac{1}{2\tau^2}\textstyle\sum\beta_i^2\Big\} \\
+&= \arg\min_\beta\ \Big\{\tfrac{1}{2\sigma^2}\textstyle\sum\varepsilon_i^2 + \tfrac{1}{2\tau^2}\textstyle\sum\beta_i^2\Big\} \\
+&= \arg\min_\beta\ \Big\{\mathrm{RSS} + \tfrac{\sigma^2}{\tau^2}\textstyle\sum\beta_i^2\Big\} \qquad \text{which is Ridge with } \lambda = \sigma^2/\tau^2
+\end{align*}$$
 
-## Elastic-Net
-In Ridge, we minimize $RSS + \lambda \|\beta\|^2$, and in Lasso, $RSS + \lambda |\beta|$. Elastic-net introduces a compromise, that has both selects variables like Lasso, and shrinks together the coefficients of correlated predictors like Ridge: 
+**Lasso, Laplace prior** $\mathbb{P}(\beta) \propto \exp\{-\textstyle\sum \|\beta_i \|/b\}$:
 
-$$\textit{minimize} \qquad RSS + \lambda \Sigma (\alpha \beta_j^2 + (1-\alpha)|\beta_j|)$$
+$$\begin{align*}
+\hat\beta_{\text{lasso}} = \arg\max_\beta\ \mathbb{P}(\beta \mid X, Y)
+&= \arg\max_\beta\ \Big(\tfrac{1}{\sqrt{2\pi\sigma^2}}\Big)^n\exp\Big\{-\tfrac{1}{2\sigma^2}\textstyle\sum\varepsilon_i^2\Big\} \cdot \Big(\tfrac{1}{\sqrt{2b}}\Big)^p\exp\Big\{-\tfrac{1}{b}\textstyle\sum|\beta_i|\Big\} \\
+&= \arg\max_\beta\ \exp\Big\{-\tfrac{1}{2\sigma^2}\textstyle\sum\varepsilon_i^2 - \tfrac{1}{b}\textstyle\sum|\beta_i|\Big\} \\
+&= \arg\min_\beta\ \Big\{\tfrac{1}{2\sigma^2}\textstyle\sum\varepsilon_i^2 + \tfrac{1}{b}\textstyle\sum|\beta_i|\Big\} \\
+&= \arg\min_\beta\ \Big\{\mathrm{RSS} + \tfrac{2\sigma^2}{b}\textstyle\sum|\beta_i|\Big\} \qquad \text{which is Lasso with } \lambda = 2\sigma^2/b
+\end{align*}$$
 
-This introduces an extra parameter $\alpha$ that defines the strength of the L2-Norm relative to the L1-Norm.
+Both are posterior modes, the ridge mode also equals the posterior mean, but the lasso mode does not.
 
-You can compute the solution using the LARS-EN algorithm for the same computational cost as Lasso.
+One can easily see how the definitions of regularization as priors on the distribution of the coefficients relate to their shrinking behavior. Imagine your OLS solution $\hat\beta$ as a point on one of the two prior curves (Gaussian for Ridge, Laplace for Lasso), and the shrinking process as the effect of these priors "pulling" the estimate toward $0$. Because the Laplace prior has a sharp peak at $0$, increasing the regularization coefficient $\lambda$ can pull a coefficient exactly to $0$. In contrast, the Gaussian prior is smooth at $0$, so the corresponding Ridge penalty only shrinks coefficients continuously toward $0$ and never forces them to be exactly zero.
 
-
----
+<hr class="post-divider">
 ## Lasso vs Ridge
-
-
-### Rotational Invariance
-
-Ridge is **Rotationally Invariant** (e.g., the learning procedure and evaluation is unchanged when applying a rotation to the features on both the training and testing set. Intuitively, this mixes informative and uninformative signals. So to remove uninformative features, a rotationally invariant algorithm has to first find the original orientation of the features).
-
-**Rotational Invariance (Ng, 2004):**
-
-Let $\mathcal{M} = \{M \in \mathbb{R}^{n \times n} : MM^T = M^TM = I, \|M\| = 1\}$ be the class of rotation matrices.
-
-A learning algorithm $\mathcal{L}$ is **rotationally invariant** if, for any training set $S$, rotation matrix $M \in \mathcal{M}$, and test example $x$:
-$$\mathcal{L}[S](x) = \mathcal{L}[MS](Mx)$$
-where $MS = \{(Mx^{(i)}, y^{(i)})\}_{i=1}^m$.
-
-**Intuition:** The algorithm's predictions don't change when we rotate the coordinate system.
-
-Rotational invariance has showned to be the cause for ineffective feature selection in ML algorithms. The reason is that you need a lot more samples for the algo to first learn the rotation then perform variable selection. I highly encourage to read the paper **Feature selection, L1 vs. L2 regularization and rotational invariance** by the great **Andrew Ng**.
-
-**Ridge** constraint is $L2$ so it is a circle, symmetric in all directions (rotation invariant).
-**Lasso** constraint is $L1$ so it is a diamond with corners pointing along the coordinate axis, so not rotationally invariant.
-
-
-In a **Sparse Environment:**
-- If the important features are correlated, you're effectively in a **Sparser** environment, as you can combine the non-noise features into more important ones so **Lasso** outperforms.
-- If the noise is correlated, you can reduce the noise dimensionality so you end up in a less-sparse environment, where Lasso suffers. In general, **Lasso suffers when the true signal is non-sparse because it tends to overshrink small but important coefficients, adding some bias**. Lasso loses more performance than **Ridge** when you go froma  sparse to a non-sparse environment. So you want the dimension reduction capability to be larger on important predictors than on noise.
-- If you have general correlation (across both features and noise), **ElasticNet** will work best. It actually outperforms both Ridge and Lasso in most settings.
- 
-Rotational Invariance and Sparsity are tightly related. If you have a highly sparse data and you apply a rotation, you're mixing the important features with a lot of noise. This is why **Ridge** which is rotation invariant is worse than **Lasso** in high-sparsity regimes.
-
 
 ### The Grouping Effect
 
-What is the grouping effect? It's a property of ML algorithms to put similar weights to similar features. Simple no? 
+The grouping effect is a property of ML algorithms to put similar weights to similar features.
 
-**The Grouping Effect** (definition by Zou and Hastie, in **Regularization and variable selection via the elastic net** (2005)):: A regression method exhibits the **grouping effect** if the coefficients of highly correlated variables tend to be equal (up to a change of sign). 
+**The Grouping Effect (Zou & Hastie, 2005):** A method has the grouping effect if highly correlated predictors receive near-equal coefficients, up to sign. This is desirable for stability (small data perturbations should not flip which correlated variable is chosen), for prediction (correlated predictors jointly carry signal, so dropping one arbitrarily loses information), and for interpretability (a group of related features is included rather than an arbitrary singleton). For identical predictors $x_i = x_j$ and penalty $J$,
 
-But why should we care about that? 
-- In domains like economics, finance, or biology, related variables often move together and selecting them together makes the mode align with domain knowledge. For example, Genes in the same pathway should be selected togethe
-- Correlated predictors **jointly** carry information about the response. Arbitrary exclusion may lose useful signal.
-- Small perturbations in data shouldn't drastically change which variable is selected. This is about **stability in variable selection**
-- **Interpretability:** Identifies groups of important features, not arbitrary singletons. Lasso has indeed the tendency to "arbitrarily" choose one predictor amongst a group of highly correlated ones and set the rest to 0. 
+$$\hat\beta = \arg\min_\beta\ \|Y - X\beta\|^2 + \lambda J(\beta)$$
 
-Assume $x_i = x_j$ (identical predictors). Consider the penalized regression:
+a strictly convex $J$ forces $\hat\beta_i = \hat\beta_j$ for all $\lambda > 0$ (Lemma 2, Zou & Hastie, 2005), which ridge satisfies. Lasso ($J = \|\beta\|_1$) only guarantees $\hat\beta_i\hat\beta_j \geq 0$ (same sign): its solution is non-unique and it typically keeps one copy arbitrarily, with no grouping.
 
-$$\hat{\beta} = \arg\min_{\beta} \|y - X\beta\|^2 + \lambda J(\beta)$$
+The effect is also quantitative. Standardize the predictors, center $Y$, and suppose $\hat\beta_i\hat\beta_j > 0$. Define the normalized coefficient gap
 
-**Strictly convex $J(\cdot)$:** $$\hat{\beta}_i = \hat{\beta}_j, \quad \forall \lambda > 0$$
+$$D(i,j) \triangleq \frac{\vert\hat\beta_i - \hat\beta_j\vert}{\|Y\|_1}$$
 
-**Lasso ($J(\beta) = \|\beta\|_1$):** $$\hat{\beta}_i \hat{\beta}_j \geq 0$$. But $\hat{\beta}_i$ may $\neq \hat{\beta}_j$
+Then for ridge with penalty $\lambda$ (Theorem 1 of Zou & Hastie, stated there for the $L_2$ part of the elastic net),
 
-Only strict convexity, (which Lasso doesn't have) guaranties grouping.
+$$D(i,j) \leq \frac{1}{\lambda}\sqrt{2(1 - \rho)} \qquad \rho = x_i^\top x_j$$
 
+The sample correlation $\rho \to 1$ drives the bound to $0$ so highly correlated features are forced to nearly identical coefficients.
 
-### Why Elastic-Net wins
+### The $L_q$ Family and Sparsity
 
-I should probably start by dropping this Theorem, from **Variable selection via nonconcave penalized likelihood and its oracle properties**, from Jiangqing Fan and Runze Li (2001): In the $L_q$ penalty family (for $$q\geq 1$$), only the Lasso ($q = 1$) produces sparse solutions.
-
-<!-- ![Diagram](/images/lq_constraints.png) -->
+The penalty $J(\beta) = \|\beta\|_q^q = \sum_j \|\beta_j \|^q$ interpolates between these behaviours.
 
 <p align="center">
 <img 
@@ -239,20 +173,35 @@ I should probably start by dropping this Theorem, from **Variable selection via 
 />
 </p>
 
+1. $q = 1$ (Lasso): corners on the axes give sparsity, but it is not strictly convex, so no grouping.
+2. $q = 2$ (Ridge): a smooth strictly convex circle gives grouping, but has no corners, so no sparsity.
+3. $1 < q < 2$ (Bridge): strictly convex, so grouping but still no sparsity.
 
-This basically means that **Bridge Regression**, which is regression with regularization $$q \in (1,2]$$, i.e. between Ridge and Lasso, does not have sharp corners. So it cannot perform Variable Selection.
+In the $L_q$ family only the Lasso ($q = 1$) produces sparse solutions (Fan & Li, 2001). Sparsity needs the non-differentiable corner, grouping needs strict convexity, and only Elastic-Net, mixing $L_1$ and $L_2$, gets both. So Elastic-Net FTW.
 
-So what do we want really out of our linear model?
+### Rotational Invariance
 
-- Variable Selection
-- Grouping Effect
-- Non - Rotational Invariance
+**Rotational Invariance (Ng, 2004):** With the rotations $\mathcal{M} = \{M : MM^\top = M^\top M = I,\ \|M\| = 1\}$, an algorithm $\mathcal{L}$ is rotationally invariant if for any training set $S$, rotation $M$, and test point $x$,
 
-Turns out that Elastic-Net satisfies all 3 of those criterias. It can perform Variable Selection by having those sharp corners in its constraint region. It also has the grouping effect, as the constraint is strictly convex. Finally, it is also non-rotationally invariant. So Elastic-Net FTW. 
+$$\mathcal{L}[S](x) = \mathcal{L}[MS](Mx) \qquad MS = \{(Mx^{(i)}, y^{(i)})\}$$
 
-<!-- <p align="center">
-  <img src="/images/constraints_en.jpg" alt="Diagram" width="600">
-</p> -->
+so predictions are unchanged by rotating the coordinate system. Ridge, OLS, kernel SVMs, and neural networks are rotationally invariant. Lasso, decision trees, naive Bayes, and feature-selection methods are not. The invariance has a cost in sparse problems: for any rotationally invariant $\mathcal{L}$ there exists a task whose labels depend on a single feature, $y = \mathbf{1}(x_1 \geq t)$, for which reaching error $\epsilon$ needs
+
+$$m = \Omega(p/\epsilon)$$
+
+training examples (Ng, 2004). A problem that should be easy, one relevant feature, requires a sample growing with the full dimension $p$, so rotationally invariant algorithms are poor feature selectors when few features matter and $p \gg n$, exactly where Lasso's non-invariance pays off.
+
+On tabular data the coordinate axes are meaningful named features and the data is not rotated, so invariance costs nothing and ridge is entirely appropriate. 
+
+
+<hr class="post-divider">
+## Elastic-Net
+
+Elastic-net mixes the two penalties, selecting variables like Lasso while shrinking correlated predictors together like Ridge:
+
+$$\hat\beta_{\text{EN}} = \arg\min_\beta\ \mathrm{RSS} + \lambda\sum_j\big(\alpha\,\beta_j^2 + (1 - \alpha)\,|\beta_j|\big)$$
+
+where $\alpha \in [0, 1]$ is the $L_2$ fraction ($\alpha = 1$ ridge, $\alpha = 0$ lasso). Geometrically the constraint set is pointed on the axes and rounded between them:
 
 <p align="center">
 <img 
@@ -264,18 +213,34 @@ Turns out that Elastic-Net satisfies all 3 of those criterias. It can perform Va
 />
 </p>
 
+$$\text{EN constraint} = \underbrace{L_1\ \text{at the corners}}_{\text{Lasso: shrinks }\beta \to 0}\ +\ \underbrace{L_2\ \text{on the edges}}_{\text{grouping effect}}$$
+
+The corners on the coordinate axes give sparsity and the rounded edges spread weight across correlated predictors.
+
+
+### Sparsity and Rotation Together
+
+The two are linked: rotating sparse data mixes the few informative features with much noise, which is why the rotation-invariant Ridge trails Lasso in high-sparsity regimes. 
+
+1. If the important features are correlated, they combine into fewer effective features, so the problem is sparser and Lasso outperforms.
+2. If the noise is correlated, its dimensionality can be reduced, leaving a less sparse problem where Lasso suffers. In general Lasso loses most against Ridge moving from a sparse to a non-sparse signal, because it overshrinks small but real coefficients.
+3. Under general correlation across both signal and noise, Elastic-Net usually beats both.
 
 I still use Ridge, though.
 
 ---
 ## References
-**The Elements ofStatistical Learning: Data Mining, Inference, and Prediction.** (2009)\
+**The Elements of Statistical Learning: Data Mining, Inference, and Prediction.** (2009)\
 Trevor Hastie, Robert Tibshirani, Jerome Friedman\
 [Book](https://hastie.su.domains/ElemStatLearn/){:target="_blank"}
 
 **Lecture notes on ridge regression** (2023)\
 Wessel N. van Wieringen\
 [Notes](https://arxiv.org/pdf/1509.09169){:target="_blank"}
+
+**Ridge Regression: Biased Estimation for Nonorthogonal Problems** (1970)\
+Arthur E. Hoerl, Robert W. Kennard\
+[Paper](https://www.jstor.org/stable/1267351){:target="_blank"}
 
 **Regularization and variable selection via the elastic net** (2005)\
 Hui Zou, Trevor Hastie\
@@ -288,3 +253,7 @@ Jianqing Fan, Runze Li\
 **Feature selection, L1 vs. L2 regularization, and rotational invariance** (2004)\
 Andrew Ng\
 [Paper](https://ai.stanford.edu/~ang/papers/icml04-l1l2.pdf){:target="_blank"}
+
+**Why do tree-based models still outperform deep learning on tabular data?** (2022)\
+Léo Grinsztajn, Edouard Oyallon, Gaël Varoquaux\
+[Paper](https://arxiv.org/abs/2207.08815){:target="_blank"}

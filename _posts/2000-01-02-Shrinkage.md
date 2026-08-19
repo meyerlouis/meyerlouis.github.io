@@ -106,8 +106,8 @@ $$\mathbb{P}(\beta \mid X, Y) \propto \mathcal{L}(Y \mid X, \beta)\,\mathbb{P}(\
 
 <p align="center">
 <img 
-  src="{{ '/images/Gaussian_Laplace.jpg' | relative_url }}"
-  data-light-src="{{ '/images/Gaussian_Laplace.jpg' | relative_url }}"
+  src="{{ '/images/Gaussian_Laplace_grey.jpg' | relative_url }}"
+  data-light-src="{{ '/images/Gaussian_Laplace_grey.jpg' | relative_url }}"
   data-dark-src="{{ '/images/Gaussian_Laplace_dark.png' | relative_url }}"
   alt="Diagram"
 />
